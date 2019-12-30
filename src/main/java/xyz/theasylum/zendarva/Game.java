@@ -1,8 +1,11 @@
 package xyz.theasylum.zendarva;
 
+
 import xyz.theasylum.zendarva.actions.Action;
 import xyz.theasylum.zendarva.actions.ActionMoveEntity;
+import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorWander;
+import xyz.theasylum.zendarva.ai.BehaviorZombie;
 
 import java.awt.*;
 
@@ -10,6 +13,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Game extends Canvas implements Runnable, KeyListener {
     private boolean isRunning = true;
@@ -18,7 +23,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
     public static String seed;
     public static Random rnd;
 
-    private Entity player;
+    public Entity player;
 
     public Queue<Action> actionQueue;
     private Queue<Integer> keyQueue;
@@ -35,14 +40,24 @@ public class Game extends Canvas implements Runnable, KeyListener {
         map = new Map(40,30);
         player = new Entity();
         player.loc= map.getSpawn();
+        player.hp=5;
+        player.maxHp=5;
         map.addEntity(player);
         addEnemies();
         drawables.add(map);
     }
 
     private void processActionQueue(){
+        boolean playerActed = false;
         while (!actionQueue.isEmpty()){
+            if (actionQueue.peek().performedBy() == player){
+               playerActed=true;
+            }
             actionQueue.poll().performAction(this,map);
+        }
+
+        if (playerActed){
+            processAI();
         }
     }
     private boolean processKeyQueue(){
@@ -92,6 +107,17 @@ public class Game extends Canvas implements Runnable, KeyListener {
     }
 
 
+    //Bad.
+    private void processAI() {
+        for (Entity entity : map.entities) {
+            List<Behavior> behave = entity.components.stream().filter(f->f instanceof Behavior).map(f->(Behavior)f).collect(Collectors.toList());
+            for (Behavior behavior : behave) {
+                Optional<Action> action = behavior.execute(map,this);
+                action.ifPresent(f->actionQueue.add(f));
+            }
+        }
+    }
+
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -117,7 +143,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
             Entity enemy = new Entity();
             enemy.loc=map.getSpawn();
             enemy.tileNum=1;
-            enemy.components.add(new BehaviorWander(enemy));
+            enemy.components.add(new BehaviorZombie(enemy));
+            enemy.hp =2;
+            enemy.maxHp=2;
             map.addEntity(enemy);
         }
 

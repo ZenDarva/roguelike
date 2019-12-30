@@ -22,4 +22,9 @@ public class ActionMoveEntity implements Action {
         return map.moveEntity(entity,targLoc.x,targLoc.y);
 
     }
+
+    @Override
+    public Entity performedBy() {
+        return entity;
+    }
 }

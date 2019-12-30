@@ -12,4 +12,6 @@ public class Entity {
     public int tileNum;
 
     public List<Component> components = new ArrayList<>();
+    public int hp;
+    public int maxHp;
 }

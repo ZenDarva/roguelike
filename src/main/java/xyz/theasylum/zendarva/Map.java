@@ -8,7 +8,8 @@ public class Map implements IDrawable {
 
     private final int width;
     private final int height;
-    private List<Entity> entities;
+    //bad.
+    public List<Entity> entities;
     Tile[][] tiles;
     Tileset tileset;
 
@@ -51,6 +52,8 @@ public class Map implements IDrawable {
     }
 
     public boolean canMove(Entity entity, int x, int y){
+        if (x < 0 || y < 0 || x > width || y > height)
+            return false;
         if (tiles[x][y].walkable() && ! entities.stream().anyMatch(f->f.loc.distance(x,y)==0)) {
             return true;
         }
