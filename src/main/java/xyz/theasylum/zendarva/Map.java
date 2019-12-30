@@ -50,6 +50,14 @@ public class Map implements IDrawable {
             return false;
     }
 
+    public boolean canMove(Entity entity, int x, int y){
+        if (tiles[x][y].walkable() && ! entities.stream().anyMatch(f->f.loc.distance(x,y)==0)) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     private class Tile{
         public int tileNum;
