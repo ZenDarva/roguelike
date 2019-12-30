@@ -2,6 +2,7 @@ package xyz.theasylum.zendarva;
 
 
 import xyz.theasylum.zendarva.actions.Action;
+import xyz.theasylum.zendarva.actions.ActionAttackEntity;
 import xyz.theasylum.zendarva.actions.ActionMoveEntity;
 import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorWander;
@@ -64,19 +65,30 @@ public class Game extends Canvas implements Runnable, KeyListener {
         if (keyQueue.isEmpty())
                 return false;
         Integer keycode = keyQueue.poll();
+        final Point newLoc = new Point();
         switch(keycode){
             case KeyEvent.VK_UP:
-                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x,player.loc.y-1)));
-                return true;
+                newLoc.setLocation(player.loc.x,player.loc.y-1);
+                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                break;
             case KeyEvent.VK_DOWN:
-                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x,player.loc.y+1)));
-                return true;
+                newLoc.setLocation(player.loc.x,player.loc.y+1);
+                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                break;
             case KeyEvent.VK_LEFT:
-                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x-1,player.loc.y)));
-                return true;
+                newLoc.setLocation(player.loc.x-1,player.loc.y);
+                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                break;
             case KeyEvent.VK_RIGHT:
-                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x+1,player.loc.y)));
-                return true;
+                newLoc.setLocation(player.loc.x+1,player.loc.y);
+                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                break;
+        }
+        if (newLoc != null){
+            Optional<Entity> targEntity = map.getEntity(newLoc);
+            targEntity.ifPresentOrElse(f->this.actionQueue.add(new ActionAttackEntity(player,f)),
+                    ()->this.actionQueue.add(new ActionMoveEntity(player, newLoc)));
+            return true;
         }
         return false;
     }
@@ -87,6 +99,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
             processActionQueue();
             processKeyQueue();
+            map.update();
 
             BufferStrategy strat = getBufferStrategy();
             if (strat == null){
@@ -100,6 +113,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
             g.fillRect(0,0,800,600);
 
             drawables.forEach(f->f.draw(g));
+
+            drawUI(g);
 
             g.dispose();
             strat.show();
@@ -149,6 +164,13 @@ public class Game extends Canvas implements Runnable, KeyListener {
             map.addEntity(enemy);
         }
 
+    }
+
+    private void drawUI(Graphics g){
+        String hp = String.format("%s/%s hp", player.hp,player.maxHp);
+        g.setColor(Color.RED);
+        g.drawString(hp,10,500);
+        g.setColor(Color.WHITE);
     }
 
     //utils.

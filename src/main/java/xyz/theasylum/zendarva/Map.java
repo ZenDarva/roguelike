@@ -3,8 +3,9 @@ package xyz.theasylum.zendarva;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
-public class Map implements IDrawable {
+public class Map implements IDrawable, ITickable {
 
     private final int width;
     private final int height;
@@ -61,6 +62,17 @@ public class Map implements IDrawable {
         return false;
     }
 
+    @Override
+    public void update() {
+        List<Entity> dead = new LinkedList<>();
+        for (Entity entity : entities) {
+            if (entity.hp <=0){
+                dead.add(entity);
+            }
+        }
+        entities.removeAll(dead);
+    }
+
 
     private class Tile{
         public int tileNum;
@@ -72,6 +84,16 @@ public class Map implements IDrawable {
             return tileNum==62;
 
         }
+    }
+
+    public Optional<Entity> getEntity(int x, int y){
+        Point point = new Point(x,y);
+        Optional<Entity> optEnt = entities.stream().filter(f->f.loc.distance(point)==0).findFirst();
+        return optEnt;
+
+    }
+    public Optional<Entity> getEntity(Point point){
+        return getEntity(point.x,point.y);
     }
 
 

@@ -5,7 +5,7 @@ plugins {
 group 'xyz.theasylum.zendarva'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 10
 
 repositories {
     mavenCentral()
@@ -13,4 +13,18 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+
+task runJar(type: JavaExec) {
+    main = "-jar";
+    args jar.archivePath
+}
+
+runJar.dependsOn(jar);
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'xyz.theasylum.zendarva.Main'
+    }
 }
