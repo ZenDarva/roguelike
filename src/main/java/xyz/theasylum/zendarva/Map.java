@@ -42,10 +42,11 @@ public class Map implements IDrawable {
     }
 
     public boolean moveEntity(Entity entity, int x, int y){
-        if (tiles[x][y].walkable()) {
+        if (tiles[x][y].walkable() && ! entities.stream().anyMatch(f->f.loc.distance(x,y)==0)) {
             entity.loc = new Point(x, y);
             return true;
         }
+
             return false;
     }
 

@@ -1,13 +1,14 @@
 package xyz.theasylum.zendarva;
 
+import xyz.theasylum.zendarva.actions.Action;
+import xyz.theasylum.zendarva.actions.ActionMoveEntity;
+
 import java.awt.*;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class Game extends Canvas implements Runnable, KeyListener {
     private boolean isRunning = true;
@@ -18,10 +19,13 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     private Entity player;
 
+    public Queue<Action> actionQueue;
+
     Map map;
 
     public Game(){
         Window window =new Window(800,600,"Roguelike1",this);
+        actionQueue = new ArrayDeque<>();
         this.requestFocus();
         seed = UUID.randomUUID().toString();
         rnd = new Random(stringToSeed(seed));
@@ -29,13 +33,23 @@ public class Game extends Canvas implements Runnable, KeyListener {
         player = new Entity();
         player.loc= map.getSpawn();
         map.addEntity(player);
+        addEnemies();
         drawables.add(map);
+    }
+
+    private void processActionQueue(){
+        if (!actionQueue.isEmpty()){
+            actionQueue.poll().performAction(this,map);
+        }
     }
 
 
     @Override
     public void run() {
         while (isRunning){
+
+            processActionQueue();
+
             BufferStrategy strat = getBufferStrategy();
             if (strat == null){
                 createBufferStrategy(2);
@@ -71,18 +85,32 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
         switch(e.getKeyCode()){
             case KeyEvent.VK_UP:
-                map.moveEntity(player,player.loc.x,player.loc.y-1);
+                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x,player.loc.y-1)));
+
                 break;
             case KeyEvent.VK_DOWN:
-                map.moveEntity(player,player.loc.x,player.loc.y+1);
+                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x,player.loc.y+1)));
                 break;
             case KeyEvent.VK_LEFT:
-                map.moveEntity(player,player.loc.x-1,player.loc.y);
+                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x-1,player.loc.y)));
                 break;
             case KeyEvent.VK_RIGHT:
-                map.moveEntity(player,player.loc.x+1,player.loc.y);
+                this.actionQueue.add(new ActionMoveEntity(player, new Point(player.loc.x+1,player.loc.y)));
                 break;
+
         }
+    }
+
+    private void addEnemies(){
+        int numEnemies = Game.rnd.nextInt(5)+3;
+
+        for (int i = 0; i < numEnemies; i++) {
+            Entity enemy = new Entity();
+            enemy.loc=map.getSpawn();
+            enemy.tileNum=1;
+            map.addEntity(enemy);
+        }
+
     }
 
     //utils.
