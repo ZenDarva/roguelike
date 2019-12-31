@@ -79,7 +79,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
         if (keyQueue.isEmpty())
                 return false;
         Integer keycode = keyQueue.poll();
-        final Point newLoc = new Point();
+        final Point newLoc = new Point(-1,-1);
         switch(keycode){
             case KeyEvent.VK_UP:
                 newLoc.setLocation(player.loc.x,player.loc.y-1);
@@ -101,7 +101,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
                 this.actionQueue.add(new ActionWait(player));
                 return true;
         }
-        if (newLoc != null){
+        if (newLoc.x !=-1 && newLoc.y !=-1){
             Optional<Entity> targEntity = map.getEntity(newLoc);
             targEntity.ifPresentOrElse(f->this.actionQueue.add(new ActionAttackEntity(player,f)),
                     ()->this.actionQueue.add(new ActionMoveEntity(player, newLoc)));
