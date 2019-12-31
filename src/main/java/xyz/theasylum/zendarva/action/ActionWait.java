@@ -16,6 +16,8 @@ public class ActionWait implements Action {
     @Override
     public boolean performAction(Game game, Map map) {
         if (!map.entities.stream().filter(f->f!=entity).anyMatch(f->f.loc.distance(entity.loc) <5)){
+            if (entity !=game.player)
+                System.out.println("Sleeping.");
             entity.hp+=1;
             if (entity.hp > entity.maxHp){
                 entity.hp = entity.maxHp;
@@ -28,6 +30,6 @@ public class ActionWait implements Action {
 
     @Override
     public Entity performedBy() {
-        return null;
+        return entity;
     }
 }

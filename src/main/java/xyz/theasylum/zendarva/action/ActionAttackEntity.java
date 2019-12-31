@@ -17,8 +17,7 @@ public class ActionAttackEntity implements Action{
 
     @Override
     public boolean performAction(Game game, Map map) {
-        targ.hp--;
-        System.out.println("Have at you!");
+        targ.hp-=Game.rnd.nextInt(2);
         return true;
     }
 

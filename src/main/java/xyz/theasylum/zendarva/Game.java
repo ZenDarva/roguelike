@@ -6,11 +6,13 @@ import xyz.theasylum.zendarva.action.ActionAttackEntity;
 import xyz.theasylum.zendarva.action.ActionMoveEntity;
 import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.ai.Behavior;
+import xyz.theasylum.zendarva.ai.BehaviorFastZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 import xyz.theasylum.zendarva.drawable.widget.WidgetStat;
 
+import javax.swing.*;
 import java.awt.*;
 
 import java.awt.event.KeyEvent;
@@ -40,13 +42,17 @@ public class Game extends Canvas implements Runnable, KeyListener {
         actionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
         this.requestFocus();
+        setupGame();
+    }
+
+    private void setupGame(){
         seed = UUID.randomUUID().toString();
         rnd = new Random(stringToSeed(seed));
         map = new Map(40,30);
         player = new Entity();
         player.loc= map.getSpawn();
-        player.hp=5;
-        player.maxHp=5;
+        player.hp=8;
+        player.maxHp=8;
         map.addEntity(player);
         addEnemies();
         drawables.add(map);
@@ -111,6 +117,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
             processActionQueue();
             processKeyQueue();
             map.update();
+            checkGameOver();
 
             BufferStrategy strat = getBufferStrategy();
             if (strat == null){
@@ -129,6 +136,17 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
             g.dispose();
             strat.show();
+        }
+    }
+
+    private void checkGameOver() {
+        if (player.hp<=0){
+            JOptionPane.showMessageDialog(null,"You Lost!");
+            actionQueue.clear();
+            widgets.clear();
+            keyQueue.clear();
+            drawables.clear();
+            setupGame();
         }
     }
 
@@ -170,18 +188,24 @@ public class Game extends Canvas implements Runnable, KeyListener {
             enemy.loc=map.getSpawn();
             enemy.tileNum=1;
             enemy.components.add(new BehaviorZombie(enemy));
-            enemy.hp =2;
-            enemy.maxHp=2;
+            enemy.hp =1;
+            enemy.maxHp=1;
+            map.addEntity(enemy);
+        }
+
+        for (int i = 0; i < numEnemies/3; i++) {
+            Entity enemy = new Entity();
+            enemy.loc=map.getSpawn();
+            enemy.tileNum=2;
+            enemy.components.add(new BehaviorFastZombie(enemy));
+            enemy.hp =3;
+            enemy.maxHp=3;
             map.addEntity(enemy);
         }
 
     }
 
     private void drawUI(Graphics g){
-//        String hp = String.format("%s/%s hp", player.hp,player.maxHp);
-//        g.setColor(Color.RED);
-//        g.drawString(hp,10,500);
-//        g.setColor(Color.WHITE);
         widgets.stream().filter(Widget::getVisible).forEach(f->f.draw(g));
     }
 
