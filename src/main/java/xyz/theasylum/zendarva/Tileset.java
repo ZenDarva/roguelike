@@ -27,7 +27,6 @@ public class Tileset {
                     index++;
                 }
             }
-            System.out.println("Done.");
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -13,7 +13,6 @@ public class Image implements IDrawable {
     public Image(){
         try {
             buf =ImageIO.read(Image.class.getResourceAsStream("/tiles.png"));
-            System.out.println("Yay!");
         } catch (IOException e) {
             e.printStackTrace();
         }
