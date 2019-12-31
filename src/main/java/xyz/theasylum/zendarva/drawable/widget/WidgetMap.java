@@ -5,6 +5,8 @@ import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.domain.Floor;
 
 import java.awt.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class WidgetMap extends Widget {
 
@@ -36,5 +38,16 @@ public class WidgetMap extends Widget {
 
     public void setFloor(Floor floor) {
         this.floor=floor;
+    }
+
+    @Override
+    public void update() {
+        List<Entity> dead = new LinkedList<>();
+        for (Entity entity : floor.getEntities()) {
+            if (entity.hp <=0){
+                dead.add(entity);
+            }
+        }
+        floor.getEntities().removeAll(dead);
     }
 }

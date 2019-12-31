@@ -8,24 +8,22 @@ import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorFastZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
-import xyz.theasylum.zendarva.domain.Floor;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 import xyz.theasylum.zendarva.drawable.widget.WidgetStat;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventSpawnEntity;
 import xyz.theasylum.zendarva.gui.GuiManager;
-import xyz.theasylum.zendarva.gui.GuiWindow;
 import xyz.theasylum.zendarva.gui.GuiWindowMain;
 
 import javax.swing.*;
 import java.awt.*;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.util.*;
 import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 public class Game extends Canvas implements Runnable, KeyListener {
@@ -41,11 +39,13 @@ public class Game extends Canvas implements Runnable, KeyListener {
     public Queue<Action> actionQueue;
     private Queue<Integer> keyQueue;
 
-    Map map;
+    //Map map;
 
 
     public static List<Entity> entityList;
 
+
+    private GuiWindowMain gameWindow;
 
     public Game(){
         Window window =new Window(800,600,"Roguelike1",this);
@@ -57,37 +57,38 @@ public class Game extends Canvas implements Runnable, KeyListener {
         setupGameNew();
     }
 
-    private void setupGame(){
-        seed = UUID.randomUUID().toString();
-        rnd = new Random(stringToSeed(seed));
-        map = new Map(40,30);
-        player = new Entity();
-        player.loc= map.getSpawn();
-        player.hp=8;
-        player.maxHp=8;
-        map.addEntity(player);
-        addEnemies();
-        drawables.add(map);
-        WidgetStat stat = new WidgetStat(player);
-        stat.setLocation(new Point(10,500));
-        stat.setVisible(true);
-        widgets.add(stat);
-    }
+//    private void setupGame(){
+//        seed = UUID.randomUUID().toString();
+//        rnd = new Random(stringToSeed(seed));
+////        map = new Map(40,30);
+//        player = new Entity();
+//  //      player.loc= map.getSpawn();
+//        player.hp=8;
+//        player.maxHp=8;
+//    //    map.addEntity(player);
+//        addEnemies();
+//      //  drawables.add(map);
+//        WidgetStat stat = new WidgetStat(player);
+//        stat.setLocation(new Point(10,500));
+//        stat.setVisible(true);
+//        widgets.add(stat);
+//    }
 
     private void setupGameNew(){
         seed = UUID.randomUUID().toString();
         rnd = new Random(stringToSeed(seed));
         Tileset tiles = new Tileset("/tiles.png",16,16);
-        GuiWindowMain main = new GuiWindowMain(800,480, 50,30,tiles);
+        GuiWindowMain main = new GuiWindowMain(800,480, 40,30,tiles);
         GuiManager.instance().addWindow(main);
+        gameWindow=main;
 
         player = new Entity();
-        player.loc= new Point(10,10);
+        player.loc= gameWindow.getCurrentFloor().getSpawn();
         player.hp=8;
         player.maxHp=8;
         EventBus.instance().raiseEvent(new EventSpawnEntity(player));
 
-
+        addEnemies();
 
     }
 
@@ -97,7 +98,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
             if (actionQueue.peek().performedBy() == player){
                playerActed=true;
             }
-            actionQueue.poll().performAction(this,map);
+            actionQueue.poll().performAction(this,gameWindow.getCurrentFloor());
         }
 
         if (playerActed){
@@ -131,7 +132,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
                 return true;
         }
         if (newLoc.x !=-1 && newLoc.y !=-1){
-            Optional<Entity> targEntity = map.getEntity(newLoc);
+            Optional<Entity> targEntity = gameWindow.getCurrentFloor().getEntity(newLoc);
             targEntity.ifPresentOrElse(f->this.actionQueue.add(new ActionAttackEntity(player,f)),
                     ()->this.actionQueue.add(new ActionMoveEntity(player, newLoc)));
             return true;
@@ -160,6 +161,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
             g.fillRect(0,0,800,600);
 
             //drawables.forEach(f->f.draw(g));
+            GuiManager.instance().update();
             GuiManager.instance().draw(g);
 
             drawUI(g);
@@ -176,17 +178,17 @@ public class Game extends Canvas implements Runnable, KeyListener {
             widgets.clear();
             keyQueue.clear();
             drawables.clear();
-            setupGame();
+            setupGameNew();
         }
     }
 
 
     //Bad.
     private void processAI() {
-        for (Entity entity : map.entities) {
+        for (Entity entity : gameWindow.getCurrentFloor().getEntities()) {
             List<Behavior> behave = entity.components.stream().filter(f->f instanceof Behavior).map(f->(Behavior)f).collect(Collectors.toList());
             for (Behavior behavior : behave) {
-                Optional<Action> action = behavior.execute(map,this);
+                Optional<Action> action = behavior.execute(gameWindow.getCurrentFloor(),this);
                 action.ifPresent(f->actionQueue.add(f));
             }
         }
@@ -215,22 +217,22 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
         for (int i = 0; i < numEnemies; i++) {
             Entity enemy = new Entity();
-            enemy.loc=map.getSpawn();
+            enemy.loc=gameWindow.getCurrentFloor().getSpawn();
             enemy.tileNum=1;
             enemy.components.add(new BehaviorZombie(enemy));
             enemy.hp =1;
             enemy.maxHp=1;
-            map.addEntity(enemy);
+            EventBus.instance().raiseEvent(new EventSpawnEntity(enemy));
         }
 
         for (int i = 0; i < numEnemies/3; i++) {
             Entity enemy = new Entity();
-            enemy.loc=map.getSpawn();
+            enemy.loc=gameWindow.getCurrentFloor().getSpawn();
             enemy.tileNum=2;
             enemy.components.add(new BehaviorFastZombie(enemy));
             enemy.hp =3;
             enemy.maxHp=3;
-            map.addEntity(enemy);
+            EventBus.instance().raiseEvent(new EventSpawnEntity(enemy));
         }
 
     }

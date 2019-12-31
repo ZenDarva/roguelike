@@ -34,4 +34,8 @@ public class GuiWindowMain extends GuiWindow {
         floor.addEntity(e.getEntity());
     }
 
+    public Floor getCurrentFloor(){
+        return floor;
+    }
+
 }

@@ -3,6 +3,7 @@ package xyz.theasylum.zendarva.action;
 import xyz.theasylum.zendarva.Entity;
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.Map;
+import xyz.theasylum.zendarva.domain.Floor;
 
 import java.awt.*;
 
@@ -18,8 +19,8 @@ public class ActionMoveEntity implements Action {
     }
 
     @Override
-    public boolean performAction(Game game, Map map) {
-        return map.moveEntity(entity,targLoc.x,targLoc.y);
+    public boolean performAction(Game game, Floor floor) {
+        return floor.moveEntity(entity,targLoc.x,targLoc.y);
 
     }
 

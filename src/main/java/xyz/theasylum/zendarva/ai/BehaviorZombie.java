@@ -7,6 +7,7 @@ import xyz.theasylum.zendarva.action.Action;
 import xyz.theasylum.zendarva.action.ActionAttackEntity;
 import xyz.theasylum.zendarva.action.ActionMoveEntity;
 import xyz.theasylum.zendarva.component.Component;
+import xyz.theasylum.zendarva.domain.Floor;
 
 import java.awt.*;
 import java.util.Optional;
@@ -25,11 +26,11 @@ public class BehaviorZombie implements Behavior, Component {
     }
 
     @Override
-    public Optional<Action> execute(Map map, Game game) {
+    public Optional<Action> execute(Floor floor, Game game) {
         int x = entity.loc.x;
         int y = entity.loc.y;
         if (entity.loc.distance(game.player.loc) > 4)
-            return wander.execute(map,game);
+            return wander.execute(floor,game);
         else if (entity.loc.distance(game.player.loc) == 1) {
             return Optional.of(new ActionAttackEntity(entity,game.player));
         }

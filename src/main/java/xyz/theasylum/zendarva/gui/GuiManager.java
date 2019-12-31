@@ -1,12 +1,13 @@
 package xyz.theasylum.zendarva.gui;
 
+import xyz.theasylum.zendarva.ITickable;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GuiManager implements IDrawable {
+public class GuiManager implements IDrawable, ITickable {
 
     private List<GuiWindow> windows;
 
@@ -40,5 +41,12 @@ public class GuiManager implements IDrawable {
     @Override
     public void draw(Graphics g) {
         windows.stream().forEach(f->f.draw(g));
+    }
+
+    @Override
+    public void update() {
+        for (GuiWindow window : windows) {
+            window.update();
+        }
     }
 }

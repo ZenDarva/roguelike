@@ -1,5 +1,6 @@
 package xyz.theasylum.zendarva.gui;
 
+import xyz.theasylum.zendarva.ITickable;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 import xyz.theasylum.zendarva.event.EventSpawnEntity;
@@ -10,8 +11,14 @@ import java.util.List;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public abstract class GuiWindow implements IDrawable {
+public abstract class GuiWindow implements IDrawable, ITickable {
     private final int width;
+
+    @Override
+    public void update() {
+        widgets.forEach(Widget::update);
+    }
+
     private final int height;
     private BufferedImage texture;
     private List<Widget> widgets;
@@ -54,6 +61,8 @@ public abstract class GuiWindow implements IDrawable {
         g.drawImage(texture,loc.x,loc.y,null);
 
     }
+
+
 
     public abstract void drawForeground(Graphics g);
 

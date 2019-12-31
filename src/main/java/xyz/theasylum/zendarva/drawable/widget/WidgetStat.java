@@ -26,4 +26,8 @@ public class WidgetStat extends Widget {
     }
 
 
+    @Override
+    public void update() {
+
+    }
 }

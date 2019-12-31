@@ -8,6 +8,7 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class Floor {
     private final int width;
@@ -40,6 +41,17 @@ public class Floor {
     }
     public List<Entity> getEntities(){
         return Collections.unmodifiableList(entities);
+    }
+
+
+    public Optional<Entity> getEntity(int x, int y){
+        Point point = new Point(x,y);
+        Optional<Entity> optEnt = entities.stream().filter(f->f.loc.distance(point)==0).findFirst();
+        return optEnt;
+
+    }
+    public Optional<Entity> getEntity(Point point){
+        return getEntity(point.x,point.y);
     }
 
     public Point getSpawn(){
@@ -127,5 +139,24 @@ public class Floor {
         for (int y = min; y<max;y++){
             tiles[x][y].tileNum=62;
         }
+    }
+
+    public boolean moveEntity(Entity entity, int x, int y){
+        if (tiles[x][y].walkable() && ! entities.stream().anyMatch(f->f.loc.distance(x,y)==0)) {
+            entity.loc = new Point(x, y);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean canMove(Entity entity, int x, int y){
+        if (x < 0 || y < 0 || x > width || y > height)
+            return false;
+        if (tiles[x][y].walkable() && ! entities.stream().anyMatch(f->f.loc.distance(x,y)==0)) {
+            return true;
+        }
+
+        return false;
     }
 }

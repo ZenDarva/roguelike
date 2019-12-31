@@ -3,6 +3,7 @@ package xyz.theasylum.zendarva.action;
 import xyz.theasylum.zendarva.Entity;
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.Map;
+import xyz.theasylum.zendarva.domain.Floor;
 
 public class ActionWait implements Action {
 
@@ -14,8 +15,8 @@ public class ActionWait implements Action {
     }
 
     @Override
-    public boolean performAction(Game game, Map map) {
-        if (!map.entities.stream().filter(f->f!=entity).anyMatch(f->f.loc.distance(entity.loc) <5)){
+    public boolean performAction(Game game, Floor floor) {
+        if (!floor.getEntities().stream().filter(f->f!=entity).anyMatch(f->f.loc.distance(entity.loc) <5)){
             if (entity !=game.player)
                 System.out.println("Sleeping.");
             entity.hp+=1;

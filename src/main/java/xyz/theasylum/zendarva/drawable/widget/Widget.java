@@ -1,11 +1,12 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
+import xyz.theasylum.zendarva.ITickable;
 import xyz.theasylum.zendarva.gui.GuiWindow;
 
 import java.awt.*;
 import java.io.IOException;
 
-public abstract class Widget {
+public abstract class Widget implements ITickable {
 
     protected boolean visible;
     protected Point loc;
