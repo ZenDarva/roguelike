@@ -8,9 +8,15 @@ import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorFastZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
+import xyz.theasylum.zendarva.domain.Floor;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 import xyz.theasylum.zendarva.drawable.widget.WidgetStat;
+import xyz.theasylum.zendarva.event.EventBus;
+import xyz.theasylum.zendarva.event.EventSpawnEntity;
+import xyz.theasylum.zendarva.gui.GuiManager;
+import xyz.theasylum.zendarva.gui.GuiWindow;
+import xyz.theasylum.zendarva.gui.GuiWindowMain;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,12 +43,18 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     Map map;
 
+
+    public static List<Entity> entityList;
+
+
     public Game(){
         Window window =new Window(800,600,"Roguelike1",this);
+        entityList = new LinkedList<>();
         actionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
         this.requestFocus();
-        setupGame();
+        //setupGame();
+        setupGameNew();
     }
 
     private void setupGame(){
@@ -60,6 +72,23 @@ public class Game extends Canvas implements Runnable, KeyListener {
         stat.setLocation(new Point(10,500));
         stat.setVisible(true);
         widgets.add(stat);
+    }
+
+    private void setupGameNew(){
+        seed = UUID.randomUUID().toString();
+        rnd = new Random(stringToSeed(seed));
+        Tileset tiles = new Tileset("/tiles.png",16,16);
+        GuiWindowMain main = new GuiWindowMain(800,480, 50,30,tiles);
+        GuiManager.instance().addWindow(main);
+
+        player = new Entity();
+        player.loc= new Point(10,10);
+        player.hp=8;
+        player.maxHp=8;
+        EventBus.instance().raiseEvent(new EventSpawnEntity(player));
+
+
+
     }
 
     private void processActionQueue(){
@@ -116,7 +145,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
             processActionQueue();
             processKeyQueue();
-            map.update();
+            //map.update();
             checkGameOver();
 
             BufferStrategy strat = getBufferStrategy();
@@ -130,7 +159,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
             g.setColor(Color.BLACK);
             g.fillRect(0,0,800,600);
 
-            drawables.forEach(f->f.draw(g));
+            //drawables.forEach(f->f.draw(g));
+            GuiManager.instance().draw(g);
 
             drawUI(g);
 

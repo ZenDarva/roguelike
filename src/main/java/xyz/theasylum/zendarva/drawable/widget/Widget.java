@@ -1,5 +1,7 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
+import xyz.theasylum.zendarva.gui.GuiWindow;
+
 import java.awt.*;
 import java.io.IOException;
 
@@ -7,6 +9,7 @@ public abstract class Widget {
 
     protected boolean visible;
     protected Point loc;
+    protected GuiWindow parent;
 
 
     protected static final Font smallFont;

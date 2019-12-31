@@ -1,5 +1,6 @@
 package xyz.theasylum.zendarva;
 
+import xyz.theasylum.zendarva.domain.Tile;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 
 import java.awt.*;
@@ -19,7 +20,6 @@ public class Map implements IDrawable, ITickable {
     public Map(int width, int height) {
         this.width = width;
         this.height = height;
-        //50,30
         tiles = new Tile[width][height];
         tileset = new Tileset("tiles.png",16,16);
         entities = new LinkedList<>();
@@ -76,17 +76,7 @@ public class Map implements IDrawable, ITickable {
     }
 
 
-    private class Tile{
-        public int tileNum;
 
-        public Tile(int tileNum) {
-            this.tileNum = tileNum;
-        }
-        public boolean walkable(){
-            return tileNum==62;
-
-        }
-    }
 
     public Optional<Entity> getEntity(int x, int y){
         Point point = new Point(x,y);
