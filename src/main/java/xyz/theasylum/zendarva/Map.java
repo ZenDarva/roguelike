@@ -1,5 +1,7 @@
 package xyz.theasylum.zendarva;
 
+import xyz.theasylum.zendarva.drawable.IDrawable;
+
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;

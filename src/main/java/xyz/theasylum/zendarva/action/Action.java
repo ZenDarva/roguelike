@@ -1,4 +1,4 @@
-package xyz.theasylum.zendarva.actions;
+package xyz.theasylum.zendarva.action;
 
 import xyz.theasylum.zendarva.Entity;
 import xyz.theasylum.zendarva.Game;

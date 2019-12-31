@@ -1,12 +1,15 @@
 package xyz.theasylum.zendarva;
 
 
-import xyz.theasylum.zendarva.actions.Action;
-import xyz.theasylum.zendarva.actions.ActionAttackEntity;
-import xyz.theasylum.zendarva.actions.ActionMoveEntity;
+import xyz.theasylum.zendarva.action.Action;
+import xyz.theasylum.zendarva.action.ActionAttackEntity;
+import xyz.theasylum.zendarva.action.ActionMoveEntity;
+import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.ai.Behavior;
-import xyz.theasylum.zendarva.ai.BehaviorWander;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
+import xyz.theasylum.zendarva.drawable.IDrawable;
+import xyz.theasylum.zendarva.drawable.widget.Widget;
+import xyz.theasylum.zendarva.drawable.widget.WidgetStat;
 
 import java.awt.*;
 
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class Game extends Canvas implements Runnable, KeyListener {
     private boolean isRunning = true;
     private ArrayList<IDrawable> drawables = new ArrayList<>();
+    private ArrayList<Widget> widgets = new ArrayList<>();
 
     public static String seed;
     public static Random rnd;
@@ -46,6 +50,10 @@ public class Game extends Canvas implements Runnable, KeyListener {
         map.addEntity(player);
         addEnemies();
         drawables.add(map);
+        WidgetStat stat = new WidgetStat(player);
+        stat.setLocation(new Point(10,500));
+        stat.setVisible(true);
+        widgets.add(stat);
     }
 
     private void processActionQueue(){
@@ -83,6 +91,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
                 newLoc.setLocation(player.loc.x+1,player.loc.y);
                 this.actionQueue.add(new ActionMoveEntity(player, newLoc));
                 break;
+            case KeyEvent.VK_SPACE:
+                this.actionQueue.add(new ActionWait(player));
+                return true;
         }
         if (newLoc != null){
             Optional<Entity> targEntity = map.getEntity(newLoc);
@@ -167,10 +178,15 @@ public class Game extends Canvas implements Runnable, KeyListener {
     }
 
     private void drawUI(Graphics g){
-        String hp = String.format("%s/%s hp", player.hp,player.maxHp);
-        g.setColor(Color.RED);
-        g.drawString(hp,10,500);
-        g.setColor(Color.WHITE);
+//        String hp = String.format("%s/%s hp", player.hp,player.maxHp);
+//        g.setColor(Color.RED);
+//        g.drawString(hp,10,500);
+//        g.setColor(Color.WHITE);
+        widgets.stream().filter(Widget::getVisible).forEach(f->f.draw(g));
+    }
+
+    private void addWidget(Widget widget){
+        widgets.add(widget);
     }
 
     //utils.
@@ -184,4 +200,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
         }
         return hash;
     }
+
+
 }

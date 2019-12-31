@@ -1,12 +1,13 @@
 package xyz.theasylum.zendarva;
 
+import xyz.theasylum.zendarva.drawable.IDrawable;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
-public class Image implements IDrawable{
+public class Image implements IDrawable {
     private BufferedImage buf;
 
     public Image(){

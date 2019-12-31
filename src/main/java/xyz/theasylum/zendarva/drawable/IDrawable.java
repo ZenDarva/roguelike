@@ -1,4 +1,4 @@
-package xyz.theasylum.zendarva;
+package xyz.theasylum.zendarva.drawable;
 
 import java.awt.*;
 
