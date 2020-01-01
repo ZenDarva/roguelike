@@ -10,7 +10,7 @@ import xyz.theasylum.zendarva.domain.Floor;
 import java.awt.*;
 import java.util.Optional;
 
-public class BehaviorWander implements Behavior, Component {
+public class BehaviorWander extends Behavior implements Component {
 
     private Entity entity;
 

@@ -1,10 +1,13 @@
 package xyz.theasylum.zendarva.action;
 
+import xyz.theasylum.zendarva.component.CombatStats;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.domain.Floor;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
+
+import java.util.Optional;
 
 public class ActionAttackEntity implements Action{
 
@@ -19,10 +22,16 @@ public class ActionAttackEntity implements Action{
 
     @Override
     public boolean performAction(Game game, Floor floor) {
-        int dmg = Game.rnd.nextInt(2);
-        targ.hp-=dmg;
+        CombatStats targStats = targ.getComponent(CombatStats.class).get();
+        CombatStats fromStats = from.getComponent(CombatStats.class).get();
+        if (targStats == null || fromStats == null|| fromStats.isActive()==false || targStats.isActive() == false){
+            return false;
+        }
+        int dmg = Game.rnd.nextInt(fromStats.getDamage());
+        targStats.doDamage(dmg);
         EventBus.instance().raiseEvent(new EventEntity.EventDamageEntity(targ,dmg));
-        if (targ.hp <= 0){
+        if (targStats.getHp() <= 0){
+            targStats.setActive(false);
             EventBus.instance().raiseEvent(new EventEntity.EventEntityDie(targ,from));
         }
         return true;

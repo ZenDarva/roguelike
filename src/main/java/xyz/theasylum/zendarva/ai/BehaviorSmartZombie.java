@@ -1,5 +1,6 @@
 package xyz.theasylum.zendarva.ai;
 
+import xyz.theasylum.zendarva.component.CombatStats;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.action.Action;
@@ -13,12 +14,12 @@ import java.awt.*;
 import java.util.Optional;
 import java.util.Random;
 
-public class BehaviorFastZombie implements Behavior, Component {
+public class BehaviorSmartZombie extends Behavior implements Component {
     private Entity entity;
 
     private BehaviorWander wander;
 
-    public BehaviorFastZombie(Entity entity){
+    public BehaviorSmartZombie(Entity entity){
 
         this.entity = entity;
         wander = new BehaviorWander(entity);
@@ -28,8 +29,14 @@ public class BehaviorFastZombie implements Behavior, Component {
     public Optional<Action> execute(Floor floor, Game game) {
         int x = entity.loc.x;
         int y = entity.loc.y;
+        CombatStats stats = entity.getComponent(CombatStats.class).get();
+        if (stats == null){
+            //I have no stats, how can i fight??
+            return Optional.empty();
+        }
+
         if (entity.loc.distance(game.player.loc) > 4) {
-            if (Game.rnd.nextFloat()>.5 && entity.hp < entity.maxHp){
+            if (Game.rnd.nextFloat()>.5 && stats.getHp() < stats.getMaxHp()){
                 return Optional.of(new ActionWait(entity));
             }
             return wander.execute(floor, game);

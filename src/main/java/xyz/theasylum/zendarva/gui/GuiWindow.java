@@ -14,40 +14,14 @@ import java.awt.image.BufferedImage;
 
 public abstract class GuiWindow implements IDrawable, ITickable {
     private final int width;
-
-    @Override
-    public void update() {
-        widgets.forEach(Widget::update);
-    }
-
     private final int height;
     private BufferedImage texture;
     private List<Widget> widgets;
     private Widget focusedWidget = null;
-
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    public void setDirty(boolean dirty) {
-        this.dirty = dirty;
-    }
-
+    private List<Widget> deadWidgets;
     private boolean dirty = true;
-
     private boolean visible = false;
-
     private Point loc;
-
-
-    public void addWidget(Widget widget){
-        widgets.add(widget);
-        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
-    }
-    public void removeWidget(Widget widget) {
-        widgets.remove(widget);
-        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
-    }
 
     public GuiWindow(int width, int height) {
         this.width = width;
@@ -56,7 +30,23 @@ public abstract class GuiWindow implements IDrawable, ITickable {
         texture = new BufferedImage(width,height,BufferedImage.TYPE_4BYTE_ABGR_PRE);
         loc = new Point(0,0);
         widgets = new LinkedList<>();
+        deadWidgets = new LinkedList<>();
     }
+    public void addWidget(Widget widget){
+        widgets.add(widget);
+        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
+    }
+    public void removeWidget(Widget widget) {
+        deadWidgets.add(widget);
+        widget.setVisible(false);
+        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
+    }
+    @Override
+    public void update() {
+        widgets.remove(deadWidgets);
+        widgets.forEach(Widget::update);
+    }
+
 
     @Override
     public void draw(Graphics g) {
@@ -75,10 +65,6 @@ public abstract class GuiWindow implements IDrawable, ITickable {
 
     }
 
-
-
-    public abstract void drawForeground(Graphics g);
-
     public boolean isVisible() {
         return visible;
     }
@@ -87,8 +73,12 @@ public abstract class GuiWindow implements IDrawable, ITickable {
         this.visible = visible;
     }
 
+    public boolean isDirty() {
+        return dirty;
+    }
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
 
-
-
-
+    public abstract void drawForeground(Graphics g);
 }

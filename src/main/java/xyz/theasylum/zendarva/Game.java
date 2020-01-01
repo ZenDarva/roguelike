@@ -6,8 +6,9 @@ import xyz.theasylum.zendarva.action.ActionAttackEntity;
 import xyz.theasylum.zendarva.action.ActionMoveEntity;
 import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.ai.Behavior;
-import xyz.theasylum.zendarva.ai.BehaviorFastZombie;
+import xyz.theasylum.zendarva.ai.BehaviorSmartZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
+import xyz.theasylum.zendarva.component.CombatStats;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
@@ -22,9 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.util.*;
-import java.util.List;
 import java.util.Queue;
-import java.util.stream.Collectors;
 
 public class Game extends Canvas implements Runnable, KeyListener {
     private boolean isRunning = true;
@@ -37,31 +36,33 @@ public class Game extends Canvas implements Runnable, KeyListener {
     public static Entity player;
 
     public Queue<Action> actionQueue;
+    public Queue<Action> playerActionQueue;
     private Queue<Integer> keyQueue;
 
     private GuiWindowMain gameWindow;
 
-    public Game(){
-        Window window =new Window(800,600,"Roguelike1",this);
+    public Game() {
+        Window window = new Window(800, 600, "Roguelike1", this);
         actionQueue = new ArrayDeque<>();
+        playerActionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
         this.requestFocus();
         setupGameNew();
     }
 
-    private void setupGameNew(){
+    private void setupGameNew() {
         seed = UUID.randomUUID().toString();
         rnd = new Random(stringToSeed(seed));
-        Tileset tiles = new Tileset("/tiles.png",16,16);
+        Tileset tiles = new Tileset("/tiles.png", 16, 16);
         player = new Entity();
 
-        GuiWindowMain main = new GuiWindowMain(800, 600,40,30, 640,480,tiles);
+        GuiWindowMain main = new GuiWindowMain(800, 600, 40, 30, 640, 480, tiles);
         GuiManager.instance().addWindow(main);
-        gameWindow=main;
+        gameWindow = main;
 
-        player.loc= gameWindow.getCurrentFloor().getSpawn();
-        player.hp=8;
-        player.maxHp=8;
+        player.loc = gameWindow.getCurrentFloor().getSpawn();
+        CombatStats stats = new CombatStats(8, 8, 2);
+        player.addComponent(CombatStats.class, stats);
 
         EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
 
@@ -69,51 +70,48 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     }
 
-    private void processActionQueue(){
-        boolean playerActed = false;
-        while (!actionQueue.isEmpty()){
-            if (actionQueue.peek().performedBy() == player){
-               playerActed=true;
-            }
-            actionQueue.poll().performAction(this,gameWindow.getCurrentFloor());
+    private void processActionQueue() {
+        if (playerActionQueue.isEmpty())
+            return;
+        playerActionQueue.poll().performAction(this, gameWindow.getCurrentFloor());
+
+        processAI();
+
+        while (!actionQueue.isEmpty()) {
+            actionQueue.poll().performAction(this, gameWindow.getCurrentFloor());
         }
 
-        if (playerActed){
-            processAI();
-        }
     }
-    private boolean processKeyQueue(){
+
+    private boolean processKeyQueue() {
         if (keyQueue.isEmpty())
-                return false;
+            return false;
         Integer keycode = keyQueue.poll();
-        final Point newLoc = new Point(-1,-1);
-        switch(keycode){
+        final Point newLoc = new Point(-1, -1);
+        switch (keycode) {
             case KeyEvent.VK_UP:
-                newLoc.setLocation(player.loc.x,player.loc.y-1);
-                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                newLoc.setLocation(player.loc.x, player.loc.y - 1);
                 break;
             case KeyEvent.VK_DOWN:
-                newLoc.setLocation(player.loc.x,player.loc.y+1);
-                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                newLoc.setLocation(player.loc.x, player.loc.y + 1);
                 break;
             case KeyEvent.VK_LEFT:
-                newLoc.setLocation(player.loc.x-1,player.loc.y);
-                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                newLoc.setLocation(player.loc.x - 1, player.loc.y);
                 break;
             case KeyEvent.VK_RIGHT:
-                newLoc.setLocation(player.loc.x+1,player.loc.y);
-                this.actionQueue.add(new ActionMoveEntity(player, newLoc));
+                newLoc.setLocation(player.loc.x + 1, player.loc.y);
                 break;
             case KeyEvent.VK_SPACE:
-                this.actionQueue.add(new ActionWait(player));
+                this.playerActionQueue.add(new ActionWait(player));
                 return true;
             case KeyEvent.VK_S:
-                player.hp=0;
+                player.getComponent(CombatStats.class).ifPresent(f -> f.setHp(0));
+
         }
-        if (newLoc.x !=-1 && newLoc.y !=-1){
+        if (newLoc.x != -1 && newLoc.y != -1) {
             Optional<Entity> targEntity = gameWindow.getCurrentFloor().getEntity(newLoc);
-            targEntity.ifPresentOrElse(f->this.actionQueue.add(new ActionAttackEntity(player,f)),
-                    ()->this.actionQueue.add(new ActionMoveEntity(player, newLoc)));
+            targEntity.ifPresentOrElse(f -> this.playerActionQueue.add(new ActionAttackEntity(player, f)),
+                    () -> this.playerActionQueue.add(new ActionMoveEntity(player, newLoc)));
             return true;
         }
         return false;
@@ -121,57 +119,82 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     @Override
     public void run() {
-        while (isRunning){
+        gameLoop();
+    }
 
-            processActionQueue();
-            processKeyQueue();
-            EventBus.instance().update();
+    public void gameLoop() {
+        long nextTick = 0;
+        long nextFrame = 0;
+        while (isRunning) {
+            long curTime = System.currentTimeMillis();
 
-            checkGameOver();
-
-            BufferStrategy strat = getBufferStrategy();
-            if (strat == null){
-                createBufferStrategy(2);
-                strat =getBufferStrategy();
+            if (curTime > nextTick) {
+                processActionQueue();
+                processKeyQueue();
+                EventBus.instance().update();
+                checkGameOver();
+                nextTick = curTime + 50;
             }
 
-            Graphics g = strat.getDrawGraphics();
+            if (curTime > nextFrame) {
 
-            g.setColor(Color.BLACK);
-            g.fillRect(0,0,800,600);
+                nextFrame = curTime + 34;
+                BufferStrategy strat = getBufferStrategy();
+                if (strat == null) {
+                    createBufferStrategy(2);
+                    strat = getBufferStrategy();
+                }
 
-            //drawables.forEach(f->f.draw(g));
-            GuiManager.instance().update();
-            GuiManager.instance().draw(g);
+                Graphics g = strat.getDrawGraphics();
 
-            drawUI(g);
+                g.setColor(Color.BLACK);
+                g.fillRect(0, 0, 800, 600);
 
-            g.dispose();
-            strat.show();
+                //drawables.forEach(f->f.draw(g));
+                GuiManager.instance().update();
+                GuiManager.instance().draw(g);
+
+                drawUI(g);
+
+                g.dispose();
+                strat.show();
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void checkGameOver() {
-        if (player.hp<=0){
-            JOptionPane.showMessageDialog(null,"You Lost!");
-            actionQueue.clear();
-            widgets.clear();
-            keyQueue.clear();
-            drawables.clear();
-            setupGameNew();
-        }
+        Optional<CombatStats> stats = player.getComponent(CombatStats.class);
+        stats.ifPresent(
+                playerStats -> {
+                    if (playerStats.getHp() <= 0) {
+                        JOptionPane.showMessageDialog(null, "You Lost!");
+                        actionQueue.clear();
+                        widgets.clear();
+                        keyQueue.clear();
+                        drawables.clear();
+                        setupGameNew();
+                    }
+                }
+        );
+
+
     }
 
 
     //Bad.
     private void processAI() {
         for (Entity entity : gameWindow.getCurrentFloor().getEntities()) {
-            List<Behavior> behave = entity.components.stream().filter(f->f instanceof Behavior).map(f->(Behavior)f).collect(Collectors.toList());
-            for (Behavior behavior : behave) {
-                Optional<Action> action = behavior.execute(gameWindow.getCurrentFloor(),this);
-                action.ifPresent(f->actionQueue.add(f));
-            }
+            entity.getComponent(Behavior.class).ifPresent(f -> processBehavior((Behavior) f));
         }
+    }
+
+    private void processBehavior(Behavior behavior) {
+        behavior.execute(gameWindow.getCurrentFloor(), this).ifPresent(f -> actionQueue.add(f));
     }
 
 
@@ -192,36 +215,38 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     }
 
-    private void addEnemies(){
-        int numEnemies = Game.rnd.nextInt(5)+3;
+    private void addEnemies() {
+        int numEnemies = Game.rnd.nextInt(5) + 3;
 
         for (int i = 0; i < numEnemies; i++) {
             Entity enemy = new Entity();
-            enemy.loc=gameWindow.getCurrentFloor().getSpawn();
-            enemy.tileNum=1;
-            enemy.components.add(new BehaviorZombie(enemy));
-            enemy.hp =1;
-            enemy.maxHp=1;
+            enemy.loc = gameWindow.getCurrentFloor().getSpawn();
+            enemy.tileNum = 1;
+            enemy.addComponent(Behavior.class, new BehaviorZombie(enemy));
+
+            CombatStats stats = new CombatStats(1,1,1);
+            enemy.addComponent(CombatStats.class, stats);
+
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 
-        for (int i = 0; i < numEnemies/3; i++) {
+        for (int i = 0; i < numEnemies / 3; i++) {
             Entity enemy = new Entity();
-            enemy.loc=gameWindow.getCurrentFloor().getSpawn();
-            enemy.tileNum=2;
-            enemy.components.add(new BehaviorFastZombie(enemy));
-            enemy.hp =3;
-            enemy.maxHp=3;
+            enemy.loc = gameWindow.getCurrentFloor().getSpawn();
+            enemy.tileNum = 2;
+            enemy.addComponent(Behavior.class, new BehaviorSmartZombie(enemy));
+            CombatStats stats = new CombatStats(3,3,2);
+            enemy.addComponent(CombatStats.class, stats);
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 
     }
 
-    private void drawUI(Graphics g){
-        widgets.stream().filter(Widget::getVisible).forEach(f->f.draw(g));
+    private void drawUI(Graphics g) {
+        widgets.stream().filter(Widget::getVisible).forEach(f -> f.draw(g));
     }
 
-    private void addWidget(Widget widget){
+    private void addWidget(Widget widget) {
         widgets.add(widget);
     }
 
@@ -232,7 +257,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
         }
         long hash = 0;
         for (char c : s.toCharArray()) {
-            hash = 31L*hash + c;
+            hash = 31L * hash + c;
         }
         return hash;
     }

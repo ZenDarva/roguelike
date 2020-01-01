@@ -12,7 +12,7 @@ import java.awt.*;
 import java.util.Optional;
 import java.util.Random;
 
-public class BehaviorZombie implements Behavior, Component {
+public class BehaviorZombie extends Behavior implements Component {
 
     private Entity entity;
 
