@@ -13,10 +13,7 @@ public class Entity {
     public Point loc;
     public int tileNum;
 
-    //private List<Component> components = new ArrayList<>();
     private HashMap<Class, Component> components = new HashMap<>();
-//    public int hp;
-//    public int maxHp;
 
     public <T extends Component> Optional<T>  getComponent(Class<T> type){
         if (components.containsKey(type)){
@@ -24,9 +21,6 @@ public class Entity {
         }
         return Optional.empty();
     }
-
-
-
 
     public void addComponent(Class type, Component component){
         components.put(type, component);

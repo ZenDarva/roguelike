@@ -27,8 +27,6 @@ import java.util.Queue;
 
 public class Game extends Canvas implements Runnable, KeyListener {
     private boolean isRunning = true;
-    private ArrayList<IDrawable> drawables = new ArrayList<>();
-    private ArrayList<Widget> widgets = new ArrayList<>();
 
     public static String seed;
     public static Random rnd;
@@ -150,11 +148,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
                 g.setColor(Color.BLACK);
                 g.fillRect(0, 0, 800, 600);
 
-                //drawables.forEach(f->f.draw(g));
                 GuiManager.instance().update();
                 GuiManager.instance().draw(g);
-
-                drawUI(g);
 
                 g.dispose();
                 strat.show();
@@ -174,9 +169,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
                     if (playerStats.getHp() <= 0) {
                         JOptionPane.showMessageDialog(null, "You Lost!");
                         actionQueue.clear();
-                        widgets.clear();
                         keyQueue.clear();
-                        drawables.clear();
                         setupGameNew();
                     }
                 }
@@ -186,7 +179,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
     }
 
 
-    //Bad.
     private void processAI() {
         for (Entity entity : gameWindow.getCurrentFloor().getEntities()) {
             entity.getComponent(Behavior.class).ifPresent(f -> processBehavior((Behavior) f));
@@ -242,13 +234,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     }
 
-    private void drawUI(Graphics g) {
-        widgets.stream().filter(Widget::getVisible).forEach(f -> f.draw(g));
-    }
-
-    private void addWidget(Widget widget) {
-        widgets.add(widget);
-    }
 
     //utils.
     static long stringToSeed(String s) {
