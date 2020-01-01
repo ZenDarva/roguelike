@@ -1,6 +1,7 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
-import xyz.theasylum.zendarva.Entity;
+import xyz.theasylum.zendarva.domain.Entity;
+import xyz.theasylum.zendarva.gui.GuiWindow;
 
 import java.awt.*;
 
@@ -8,8 +9,8 @@ public class WidgetStat extends Widget {
 
     private Entity entity;
 
-    public WidgetStat(Entity entity) {
-
+    public WidgetStat(GuiWindow parent, Entity entity) {
+        super(parent);
         this.entity = entity;
     }
 
@@ -21,8 +22,6 @@ public class WidgetStat extends Widget {
         percent = percent * 100;
         percent = (percent * 70f)/100;
         drawRect(g,10,15,(int)percent,10,true);
-//        drawSmallString(g,10,35,""+percent);
-//        drawSmallString(g,10,50,"" + entity.hp);
     }
 
 

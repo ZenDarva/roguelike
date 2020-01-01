@@ -35,8 +35,13 @@ public class Tileset {
 
 
     public void draw(Graphics g, int x, int y) {
+        drawScaled(g,x,y,1);
+    }
+
+    public void drawScaled(Graphics g, int x ,int y, int scale) {
         Rectangle rect = tiles.get(tileNum);
-        g.drawImage(image,x,y,tileWidth+x,tileHeight+y,rect.x,rect.y,rect.x+rect.width,rect.y+rect.height,null);
+        g.drawImage(image,x,y,tileWidth*scale+x,tileHeight*scale+y,rect.x,rect.y,rect.x+rect.width,rect.y+rect.height,null);
+
     }
 
     public void setTileNum(int num){

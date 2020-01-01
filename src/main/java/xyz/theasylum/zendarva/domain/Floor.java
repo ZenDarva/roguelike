@@ -1,8 +1,9 @@
 package xyz.theasylum.zendarva.domain;
 
-import xyz.theasylum.zendarva.Entity;
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.Tileset;
+import xyz.theasylum.zendarva.event.EventBus;
+import xyz.theasylum.zendarva.event.EventEntity;
 
 import java.awt.*;
 import java.util.Collections;
@@ -11,6 +12,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class Floor {
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     private final int width;
     private final int height;
 
@@ -26,13 +35,13 @@ public class Floor {
         tiles = new Tile[width][height];
 
         generateRooms();
+
+        EventBus.instance().registerHandler(this);
     }
 
     public Tile[][] getTiles(){
         return tiles;
     }
-
-
     public void addEntity(Entity entity){
         entities.add(entity);
     }
@@ -52,6 +61,10 @@ public class Floor {
     }
     public Optional<Entity> getEntity(Point point){
         return getEntity(point.x,point.y);
+    }
+
+    private void handleMobDeath(EventEntity.EventEntityDie e){
+        entities.remove(e.getEntity());
     }
 
     public Point getSpawn(){
@@ -103,9 +116,8 @@ public class Floor {
             if (center != null){
                 horizontalCorridor((int)rect.getCenterX(),center.x,(int)rect.getCenterY());
                 verticalCorridor((int)rect.getCenterY(),center.y,center.x);
-                center = new Point((int)rect.getCenterX(),(int)rect.getCenterY());
             }
-            else
+
                 center = new Point((int)rect.getCenterX(),(int)rect.getCenterY());
 
             rooms.add(rect);
@@ -136,7 +148,7 @@ public class Floor {
         int min = Math.min(y1,y2);
         int max = Math.max(y1,y2);
 
-        for (int y = min; y<max;y++){
+        for (int y = min; y<max+1;y++){
             tiles[x][y].tileNum=62;
         }
     }

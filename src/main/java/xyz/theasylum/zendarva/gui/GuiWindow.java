@@ -3,8 +3,9 @@ package xyz.theasylum.zendarva.gui;
 import xyz.theasylum.zendarva.ITickable;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
-import xyz.theasylum.zendarva.event.EventSpawnEntity;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,6 +24,15 @@ public abstract class GuiWindow implements IDrawable, ITickable {
     private BufferedImage texture;
     private List<Widget> widgets;
     private Widget focusedWidget = null;
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
     private boolean dirty = true;
 
     private boolean visible = false;
@@ -30,11 +40,13 @@ public abstract class GuiWindow implements IDrawable, ITickable {
     private Point loc;
 
 
-    protected void addWidget(Widget widget){
+    public void addWidget(Widget widget){
         widgets.add(widget);
+        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
     }
-    protected void removeWidget(Widget widget) {
+    public void removeWidget(Widget widget) {
         widgets.remove(widget);
+        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
     }
 
     public GuiWindow(int width, int height) {
@@ -57,6 +69,7 @@ public abstract class GuiWindow implements IDrawable, ITickable {
             widgets.stream().filter(Widget::getVisible).forEach(f->f.draw(lg));
 
             drawForeground(lg);
+            //dirty = false;
         }
         g.drawImage(texture,loc.x,loc.y,null);
 

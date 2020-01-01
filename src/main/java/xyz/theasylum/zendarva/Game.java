@@ -8,11 +8,11 @@ import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorFastZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
+import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
-import xyz.theasylum.zendarva.drawable.widget.WidgetStat;
 import xyz.theasylum.zendarva.event.EventBus;
-import xyz.theasylum.zendarva.event.EventSpawnEntity;
+import xyz.theasylum.zendarva.event.EventEntity;
 import xyz.theasylum.zendarva.gui.GuiManager;
 import xyz.theasylum.zendarva.gui.GuiWindowMain;
 
@@ -34,59 +34,36 @@ public class Game extends Canvas implements Runnable, KeyListener {
     public static String seed;
     public static Random rnd;
 
-    public Entity player;
+    public static Entity player;
 
     public Queue<Action> actionQueue;
     private Queue<Integer> keyQueue;
-
-    //Map map;
-
-
-    public static List<Entity> entityList;
-
 
     private GuiWindowMain gameWindow;
 
     public Game(){
         Window window =new Window(800,600,"Roguelike1",this);
-        entityList = new LinkedList<>();
         actionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
         this.requestFocus();
-        //setupGame();
         setupGameNew();
     }
-
-//    private void setupGame(){
-//        seed = UUID.randomUUID().toString();
-//        rnd = new Random(stringToSeed(seed));
-////        map = new Map(40,30);
-//        player = new Entity();
-//  //      player.loc= map.getSpawn();
-//        player.hp=8;
-//        player.maxHp=8;
-//    //    map.addEntity(player);
-//        addEnemies();
-//      //  drawables.add(map);
-//        WidgetStat stat = new WidgetStat(player);
-//        stat.setLocation(new Point(10,500));
-//        stat.setVisible(true);
-//        widgets.add(stat);
-//    }
 
     private void setupGameNew(){
         seed = UUID.randomUUID().toString();
         rnd = new Random(stringToSeed(seed));
         Tileset tiles = new Tileset("/tiles.png",16,16);
-        GuiWindowMain main = new GuiWindowMain(800,480, 40,30,tiles);
+        player = new Entity();
+
+        GuiWindowMain main = new GuiWindowMain(800, 600,40,30, 640,480,tiles);
         GuiManager.instance().addWindow(main);
         gameWindow=main;
 
-        player = new Entity();
         player.loc= gameWindow.getCurrentFloor().getSpawn();
         player.hp=8;
         player.maxHp=8;
-        EventBus.instance().raiseEvent(new EventSpawnEntity(player));
+
+        EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
 
         addEnemies();
 
@@ -130,6 +107,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
             case KeyEvent.VK_SPACE:
                 this.actionQueue.add(new ActionWait(player));
                 return true;
+            case KeyEvent.VK_S:
+                player.hp=0;
         }
         if (newLoc.x !=-1 && newLoc.y !=-1){
             Optional<Entity> targEntity = gameWindow.getCurrentFloor().getEntity(newLoc);
@@ -146,7 +125,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
             processActionQueue();
             processKeyQueue();
-            //map.update();
+            EventBus.instance().update();
+
             checkGameOver();
 
             BufferStrategy strat = getBufferStrategy();
@@ -222,7 +202,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
             enemy.components.add(new BehaviorZombie(enemy));
             enemy.hp =1;
             enemy.maxHp=1;
-            EventBus.instance().raiseEvent(new EventSpawnEntity(enemy));
+            EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 
         for (int i = 0; i < numEnemies/3; i++) {
@@ -232,7 +212,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
             enemy.components.add(new BehaviorFastZombie(enemy));
             enemy.hp =3;
             enemy.maxHp=3;
-            EventBus.instance().raiseEvent(new EventSpawnEntity(enemy));
+            EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 
     }

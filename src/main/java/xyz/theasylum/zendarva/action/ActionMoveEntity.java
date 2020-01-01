@@ -1,8 +1,7 @@
 package xyz.theasylum.zendarva.action;
 
-import xyz.theasylum.zendarva.Entity;
+import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.Game;
-import xyz.theasylum.zendarva.Map;
 import xyz.theasylum.zendarva.domain.Floor;
 
 import java.awt.*;
@@ -13,7 +12,6 @@ public class ActionMoveEntity implements Action {
     private final Point targLoc;
 
     public ActionMoveEntity(Entity entity, Point targLoc){
-
         this.entity = entity;
         this.targLoc = targLoc;
     }

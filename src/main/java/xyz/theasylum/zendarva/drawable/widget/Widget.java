@@ -11,6 +11,21 @@ public abstract class Widget implements ITickable {
     protected boolean visible;
     protected Point loc;
     protected GuiWindow parent;
+    protected int zDepth;
+
+
+    public int getzDepth() {
+        return zDepth;
+    }
+
+    public void setzDepth(int zDepth) {
+        this.zDepth = zDepth;
+    }
+
+    public Widget(GuiWindow parent){
+        this.parent = parent;
+        this.loc = new Point(0,0);
+    }
 
 
     protected static final Font smallFont;
@@ -21,11 +36,8 @@ public abstract class Widget implements ITickable {
         try {
             smallFont1 = Font.createFont(Font.TRUETYPE_FONT, Widget.class.getResourceAsStream("/square.ttf"));
             smallFont1=smallFont1.deriveFont(8F);
-        } catch (FontFormatException e) {
-            smallFont1 = Font.getFont("Monospaced");
-            smallFont1=smallFont1.deriveFont(8F);
-        } catch (IOException e) {
-            smallFont1 = Font.getFont("Monospaced");
+        } catch (Exception e) {
+            smallFont1 = Font.getFont("System");
             smallFont1=smallFont1.deriveFont(8F);
         }
 
