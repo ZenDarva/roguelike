@@ -1,0 +1,74 @@
+
+
+
+{
+  "namedTiles": {
+
+    "nothing": 4,
+
+    "roomFloor":114,
+    "westTrim":84,
+    "northTrim": 130,
+    "southTrim": 65,
+    "eastTrim": 80,
+
+    "northWestCornerTrim": 64,
+    "northEastCornerTrim": 68,
+    "southWestCornerTrim": 128,
+    "southEastCornerTrim": 132,
+
+    "northWestTrim": 86,
+    "northEastTrim":85,
+    "southWestTrim": 70,
+    "southEastTrim": 69,
+
+    "eastWestTrim": 101,
+    "northSouthTrim": 102,
+
+    "northEastWestTrim": 117,
+    "northEastSouthTrim": 118,
+    "southEastWestTrim": 119,
+    "northWestSouthTrim": 120,
+
+    "floorBroken1": 17,
+    "floorBroken2": 18,
+    "floorBorken3": 19,
+
+    "floorShadowNorth": 98,
+    "floorShadowNorthWest": 97,
+    "floorShadowWest": 113,
+
+    "northWall": 82
+  },
+
+  "walkableTiles": [
+    114,
+    82,
+    98,
+    97,
+    113
+  ],
+
+  "neededTrim": {
+    "1": "northTrim",
+    "2": "eastTrim",
+    "4": "westTrim",
+    "8": "southTrim",
+    "16": "northEastCornerTrim",
+    "32": "northWestCornerTrim",
+    "64": "southEastCornerTrim",
+    "128": "southWestCornerTrim",
+    "3": "northEastTrim",
+    "5": "northWestTrim",
+    "10": "southEastTrim",
+    "12": "southWestTrim",
+    "9": "northSouthTrim",
+    "6": "eastWestTrim",
+    "7": "northEastWestTrim",
+    "11": "northEastSouthTrim",
+    "14": "southEastWestTrim",
+    "13": "northWestSouthTrim"
+
+  }
+
+}

@@ -9,6 +9,7 @@ import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorSmartZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
 import xyz.theasylum.zendarva.component.CombatStats;
+import xyz.theasylum.zendarva.component.Renderable;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
@@ -39,19 +40,23 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     private GuiWindowMain gameWindow;
 
+    //bad!
+    private Tileset entityTileset;
+
     public Game() {
         Window window = new Window(800, 600, "Roguelike1", this);
         actionQueue = new ArrayDeque<>();
         playerActionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
         this.requestFocus();
+        entityTileset = new Tileset("/Humanoid0.png",16,16);
         setupGameNew();
     }
 
     private void setupGameNew() {
         seed = UUID.randomUUID().toString();
         rnd = new Random(stringToSeed(seed));
-        Tileset tiles = new Tileset("/tiles.png", 16, 16);
+        Tileset tiles = new Tileset("/tiles2.png", 16, 16);
         player = new Entity();
 
         GuiWindowMain main = new GuiWindowMain(800, 600, 40, 30, 640, 480, tiles);
@@ -61,6 +66,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
         player.loc = gameWindow.getCurrentFloor().getSpawn();
         CombatStats stats = new CombatStats(8, 8, 2);
         player.addComponent(CombatStats.class, stats);
+
+        player.addComponent(Renderable.class, new Renderable(entityTileset,90));
 
         EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
 
@@ -219,6 +226,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
             CombatStats stats = new CombatStats(1,1,1);
             enemy.addComponent(CombatStats.class, stats);
 
+            enemy.addComponent(Renderable.class,new Renderable(entityTileset,80));
+
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 
@@ -229,6 +238,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
             enemy.addComponent(Behavior.class, new BehaviorSmartZombie(enemy));
             CombatStats stats = new CombatStats(3,3,2);
             enemy.addComponent(CombatStats.class, stats);
+            enemy.addComponent(Renderable.class,new Renderable(entityTileset,0));
+
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 

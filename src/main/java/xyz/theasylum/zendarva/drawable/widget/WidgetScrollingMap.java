@@ -1,6 +1,7 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
 import xyz.theasylum.zendarva.Game;
+import xyz.theasylum.zendarva.component.Renderable;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.domain.Floor;
 import xyz.theasylum.zendarva.event.EventBus;
@@ -9,6 +10,8 @@ import xyz.theasylum.zendarva.gui.GuiWindow;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
+
 
 public class WidgetScrollingMap extends Widget {
     private final int width;
@@ -57,8 +60,11 @@ public class WidgetScrollingMap extends Widget {
         for (Entity entity : floor.getEntities()) {
             if (!rect.contains(entity.loc))
                 continue;
-            floor.getTileset().setTileNum(entity.tileNum);
-            floor.getTileset().drawScaled(gl,(entity.loc.x-offset.x)*tileWidth,(entity.loc.y -offset.y) *tileHeight,scale);
+            Optional<Renderable> entityRenderable = entity.getComponent(Renderable.class);
+            entityRenderable.ifPresent(f->{
+                f.getTileset().setTileNum(f.getTileNum());
+                f.getTileset().drawScaled(gl,worldToScreenCoords(entity.loc.x,entity.loc.y),scale);
+            });
         }
 
         gl.dispose();
@@ -84,7 +90,6 @@ public class WidgetScrollingMap extends Widget {
     private void damageEntity(EventEntity.EventDamageEntity e){
         WidgetPopupText popup = new WidgetPopupText(parent,30, ""+e.getAmount() * -1);
 
-        //popup.setLocation(new Point((e.getEntity().loc.x* tileWidth) +(tileWidth/2) ,(e.getEntity().loc.y* tileHeight) +(tileHeight/2)));
         Point loc = worldToScreenCoords(e.getEntity().loc.x,e.getEntity().loc.y);
 
         loc.x+=tileWidth/2;
@@ -106,8 +111,8 @@ public class WidgetScrollingMap extends Widget {
     private Point getOffset(){
         int x = Math.max(0,focusEntity.loc.x-(width/tileWidth)/2);
         int y = Math.max(0,focusEntity.loc.y-(height/tileHeight)/2);
-        x = Math.min((floor.getWidth()-width/tileWidth)-1,x);
-        y = Math.min((floor.getHeight()-height/tileHeight)-1,y);
+        x = Math.min((floor.getWidth()-width/tileWidth),x);
+        y = Math.min((floor.getHeight()-height/tileHeight),y);
         return new Point(x,y);
     }
 
