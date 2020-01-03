@@ -10,6 +10,7 @@ import xyz.theasylum.zendarva.gui.GuiWindow;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -52,13 +53,19 @@ public class WidgetScrollingMap extends Widget {
 
         for (int x = offset.x; x< width/tileWidth+offset.x ;x++){
             for (int y = offset.y; y < height/tileHeight+offset.y ;y++){
+                if (floor.getTiles()[x][y].visited == false){
+                    continue;
+                }
                 floor.getTileset().setTileNum(floor.getTiles()[x][y].tileNum);
                 floor.getTileset().drawScaled(gl,(x-offset.x) *tileWidth,(y-offset.y)*tileHeight,scale);
             }
         }
         Rectangle rect = new Rectangle(offset.x,offset.y,width/tileWidth+offset.x,height/tileHeight+offset.x);
+        List<Point> playerFOV = floor.getFOV(Game.player);
         for (Entity entity : floor.getEntities()) {
-            if (!rect.contains(entity.loc))
+            if (!playerFOV.contains(entity.loc))
+                continue;
+            if (floor.getTiles()[entity.loc.x][entity.loc.y].visited == false)
                 continue;
             Optional<Renderable> entityRenderable = entity.getComponent(Renderable.class);
             entityRenderable.ifPresent(f->{
@@ -85,6 +92,7 @@ public class WidgetScrollingMap extends Widget {
 
     @Override
     public void update() {
+        floor.updateFOV(Game.player);
     }
 
     private void damageEntity(EventEntity.EventDamageEntity e){

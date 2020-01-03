@@ -61,6 +61,9 @@ public class Floor {
         return optEnt;
 
     }
+    public int getTile(int x, int y){
+        return tiles[x][y].tileNum;
+    }
     public Optional<Entity> getEntity(Point point){
         return getEntity(point.x,point.y);
     }
@@ -99,5 +102,54 @@ public class Floor {
         }
 
         return false;
+    }
+
+    public List<Point> getFOV(Entity entity){
+        List<Point> fovPoints = new LinkedList<>();
+        if (tiles[entity.loc.x][entity.loc.y].fov !=null){
+            return tiles[entity.loc.x][entity.loc.y].fov;
+        }
+        double x,y;
+
+        for (int i=0;i<360;i++){
+            x=Math.cos((float)i*0.01745f);
+            y=Math.sin((float)i*0.01745f);
+            getFOV(entity, x,y,fovPoints);
+        }
+        tiles[entity.loc.x][entity.loc.y].fov =fovPoints;
+        return fovPoints;
+    }
+    private void getFOV(Entity entity, double x, double y, List<Point> fovPoints){
+        float lx = (float) (entity.loc.x+.5);
+        float ly = (float) (entity.loc.y+.5);
+
+        for (int i =0;i<6;i++) {
+            Point point = new Point((int)lx,(int)ly);
+            if (!fovPoints.contains(point))
+                fovPoints.add(point);
+            if (!isWalkable((int)lx,(int)ly))
+                return;
+            lx+=x;
+            ly+=y;
+        }
+
+    }
+
+    public void updateFOV(Entity entity){
+        List<Point> fov = getFOV(entity);
+        fov.stream().forEach(f->setVisible(f.x,f.y));
+    }
+
+    private void setVisible(int x, int y){
+        if (x < 0 || y < 0 || x > width-1 || y > height-1)
+            return;
+
+        tiles[x][y].visited=true;
+    }
+
+    public boolean isWalkable(int x, int y){
+        if (x < 0 || y < 0 || x > width-1 || y > height-1)
+            return false;
+        return tileset.tileWalkable(tiles[x][y]);
     }
 }
