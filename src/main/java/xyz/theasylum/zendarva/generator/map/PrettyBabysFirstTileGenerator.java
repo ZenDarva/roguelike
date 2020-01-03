@@ -35,7 +35,7 @@ public class PrettyBabysFirstTileGenerator implements MapGenerator {
 
         for (int x = 0; x< width;x++){
             for (int y = 0; y <height;y++){
-                tiles[x][y]= new Tile(4);
+                tiles[x][y]= new Tile(tileset.getNamedTilenum("nothing"));
             }
         }
 
@@ -67,9 +67,10 @@ public class PrettyBabysFirstTileGenerator implements MapGenerator {
 
             rooms.add(rect);
         }
-        rooms.stream().forEach(f->setTiles(f,114));
+        rooms.stream().forEach(f->setTiles(f,tileset.getNamedTilenum("roomFloor")));
 
         applyTrim();
+        applyWalls();
 
     }
 
@@ -85,20 +86,21 @@ public class PrettyBabysFirstTileGenerator implements MapGenerator {
         int max = Math.max(x1,x2);
 
         Rectangle rect = new Rectangle(min,y,max-min,1);
-        setTiles(rect, 114);
+        setTiles(rect, tileset.getNamedTilenum("roomFloor"));
     }
     private void verticalCorridor(int y1, int y2, int x){
         int min = Math.min(y1,y2);
         int max = Math.max(y1,y2);
 
         Rectangle rect = new Rectangle(x,min,1,max-min);
-        setTiles(rect,114);
+        setTiles(rect,tileset.getNamedTilenum("roomFloor"));
     }
 
     private void applyTrim(){
         int flags=0;
         int floorTile = tileset.getNamedTilenum("roomFloor");
         int empty = tileset.getNamedTilenum("nothing");
+
 
         for (int x = 0; x<width;x++){
             for (int y = 0; y<width;y++) {
@@ -115,20 +117,47 @@ public class PrettyBabysFirstTileGenerator implements MapGenerator {
                     flags |= Tileset.NORTH;
                 if (getTile(x,y+1)== floorTile)
                     flags |= Tileset.SOUTH;
-                if (flags==0) {
+                //if (flags==0) {
                     if (getTile(x + 1, y + 1) == floorTile)
-                        flags |= Tileset.NORTHWEST;
-                    if (getTile(x - 1, y + 1) == floorTile)
-                        flags |= Tileset.NORTHEAST;
-                    if (getTile(x + 1, y - 1) == floorTile)
-                        flags |= Tileset.SOUTHWEST;
-                    if (getTile(x - 1, y - 1) == floorTile)
                         flags |= Tileset.SOUTHEAST;
-                }
+                    if (getTile(x - 1, y + 1) == floorTile)
+                        flags |= Tileset.SOUTHWEST;
+                    if (getTile(x + 1, y - 1) == floorTile)
+                        flags |= Tileset.NORTHEAST;
+                    if (getTile(x - 1, y - 1) == floorTile)
+                        flags |= Tileset.NORTHWEST;
+                //}
                 if (flags !=0)
-                    setTile(x,y,tileset.getNeededTrim(flags));
+                    setTile(x,y,flags);
             }
         }
+    }
+
+    private void applyWalls(){
+        int floorTile = tileset.getNamedTilenum("roomFloor");
+        int wall = tileset.getNamedTilenum("wall");
+        int shortWall = tileset.getNamedTilenum("shortWall");
+        int empty = tileset.getNamedTilenum("nothing");
+
+        for (int x = 0; x<width;x++) {
+            for (int y = 0; y < width; y++) {
+                //&& getTile(x,y+1) == floorTile)
+                if ((getTile(x,y) == floorTile))
+                {
+
+
+                    if (isTrim(x,y-1)&& !isTrim(x,y+1) )
+                        setTile(x,y,wall);
+
+                    if (isTrim(x,y-1)&& isTrim(x,y+1) )
+                        setTile(x,y,shortWall);
+                }
+            }
+        }
+    }
+
+    private boolean isTrim(int x, int y) {
+        return getTile(x,y) > 0 && getTile(x,y) < tileset.getNamedTilenum("roomFloor");
     }
 
     private int getTile(int x, int y){

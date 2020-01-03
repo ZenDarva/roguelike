@@ -9,6 +9,7 @@ import xyz.theasylum.zendarva.domain.TilesetData;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,6 +25,19 @@ public class TilesetGenerator {
     BufferedImage newTileset;
     DynamicTilesetData data;
     ArrayList<Rectangle> tiles;
+
+    public int getTileWidth() {
+        return tileWidth;
+    }
+
+    public int getTileHeight() {
+        return tileHeight;
+    }
+
+    public TilesetData getNewData() {
+        return newData;
+    }
+
     TilesetData newData;
 
     public TilesetGenerator(String filename){
@@ -61,10 +75,11 @@ public class TilesetGenerator {
 
     public BufferedImage generate(){
         Graphics g = newTileset.createGraphics();
-        g.setColor(Color.white);
+        g.setColor(Color.black);
         g.fillRect(0,0,tileWidth,tileHeight);
 
-        for (int i=1;i<=192; i++){
+        System.out.println("Begin generating Tileset");
+        for (int i=1;i<=256; i++){
         int[] tile = {99,99,99,99};
 
         for(int flag = 1; flag <=128;flag*=2)
@@ -77,9 +92,24 @@ public class TilesetGenerator {
             createTileByArray(g,x,y,tile);
 
         }
-        setTileNumByName(g,0,"roomFloor");
-        setTileNumByName(g,193, "floorShadow");
+        setTileNumByName(g,257,"roomFloor");
+        setTileNumByName(g,258, "floorShadow");
+        setTileNumByName(g,259,"wall");
+        setTileNumByName(g,260,"shortWall");
 
+        setTileNumByName(g,0,"nothing");
+
+        for (String walkableTile : data.walkableTiles) {
+            newData.walkableTiles.add(newData.namedTiles.get(walkableTile));
+        }
+
+        File outputFile = new File("/temp/generatedTiles.png");
+        try {
+            ImageIO.write(newTileset,"png",outputFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Done generating tileset.");
         return newTileset;
 
     }

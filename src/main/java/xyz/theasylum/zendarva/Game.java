@@ -22,11 +22,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.util.*;
 import java.util.Queue;
 
-public class Game extends Canvas implements Runnable, KeyListener {
+public class Game extends Canvas implements Runnable, KeyListener, MouseListener {
     private boolean isRunning = true;
 
     public static String seed;
@@ -45,6 +47,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     public Game() {
         Window window = new Window(800, 600, "Roguelike1", this);
+        this.addMouseListener(this);
         actionQueue = new ArrayDeque<>();
         playerActionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
@@ -56,7 +59,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
     private void setupGameNew() {
         seed = UUID.randomUUID().toString();
         rnd = new Random(stringToSeed(seed));
-        Tileset tiles = new Tileset("/tiles2.png", 16, 16);
+        Tileset tiles = new Tileset("/tiles3.png");
         player = new Entity();
 
         GuiWindowMain main = new GuiWindowMain(800, 600, 40, 30, 640, 480, tiles);
@@ -124,33 +127,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     @Override
     public void run() {
-        //gameLoop();
-        testLoop();
-    }
-
-    public void testLoop(){
-
-        Image image = new Image();
-        while (true){
-
-            BufferStrategy strat = getBufferStrategy();
-            if (strat == null) {
-                createBufferStrategy(2);
-                strat = getBufferStrategy();
-            }
-
-            Graphics g = strat.getDrawGraphics();
-
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 800, 600);
-
-            image.draw(g);
-
-            g.dispose();
-            strat.show();
-
-
-        }
+        gameLoop();
     }
 
     public void gameLoop() {
@@ -272,6 +249,32 @@ public class Game extends Canvas implements Runnable, KeyListener {
     }
 
 
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
     //utils.
     static long stringToSeed(String s) {
         if (s == null) {
@@ -283,6 +286,4 @@ public class Game extends Canvas implements Runnable, KeyListener {
         }
         return hash;
     }
-
-
 }

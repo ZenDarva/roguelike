@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import xyz.theasylum.zendarva.domain.Tile;
 import xyz.theasylum.zendarva.domain.TilesetData;
+import xyz.theasylum.zendarva.generator.TilesetGenerator;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -58,6 +59,29 @@ public class Tileset {
             return;
         JsonReader reader = new JsonReader(new InputStreamReader(is));
         data = gson.fromJson(reader, TilesetData.class);
+
+
+
+    }
+
+    public Tileset(String filename){
+        TilesetGenerator generator = new TilesetGenerator(filename);
+        image = generator.generate();
+        data = generator.getNewData();
+        this.tileWidth=generator.getTileWidth();
+        this.tileHeight=generator.getTileHeight();
+
+        int index=0;
+
+        tiles = new ArrayList<Rectangle>();
+
+        for (int y = 0; y< image.getHeight();y+=tileHeight){
+            for (int x = 0;x<image.getWidth();x+=tileWidth){
+                Rectangle rect = new Rectangle(x,y,tileWidth,tileHeight);
+                tiles.add(index,rect);
+                index++;
+            }
+        }
     }
 
 
@@ -95,15 +119,9 @@ public class Tileset {
         if (data.namedTiles.containsKey(name)){
             return data.namedTiles.get(name);
         }
-        return 4;
+        return 0; //cannonically empty tile.
     }
 
-    public int getNeededTrim(int flag){
-        if (!data.neededTrim.containsKey(flag))
-            return 4;
-        return getNamedTilenum(data.neededTrim.get(flag));
-
-    }
 
     public boolean tileWalkable(Tile tile){
         return data.walkableTiles.contains(tile.tileNum);

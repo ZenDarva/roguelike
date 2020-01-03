@@ -18,13 +18,12 @@
 
     "nothing": [99,99,99,99],
     "roomFloor": [8,9,28,29],
-    "floorShadow": [10,11,30,31]
+    "floorShadow": [10,11,30,31],
+    "wall": [12,13,32,33],
+    "shortWall": [12,13,10,11]
   },
 
   "neededTiles": {
-
-    
-
     "1": "northTrim",
     "2": "eastTrim",
     "4": "westTrim",
@@ -35,11 +34,12 @@
     "64": "southEastCornerTrim",
     "128": "southWestCornerTrim"
 },
-  "mergeTable": {
-    "0,2": 4,
-    "1,3": 5,
-    "20,22": 24,
-    "21,23": 25
-  }
+
+  "walkableTiles": [
+    "roomFloor",
+    "wall",
+    "shortWall",
+    "floorShadow"
+]
 
 }
