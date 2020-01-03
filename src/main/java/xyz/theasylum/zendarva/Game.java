@@ -124,7 +124,33 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     @Override
     public void run() {
-        gameLoop();
+        //gameLoop();
+        testLoop();
+    }
+
+    public void testLoop(){
+
+        Image image = new Image();
+        while (true){
+
+            BufferStrategy strat = getBufferStrategy();
+            if (strat == null) {
+                createBufferStrategy(2);
+                strat = getBufferStrategy();
+            }
+
+            Graphics g = strat.getDrawGraphics();
+
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, 800, 600);
+
+            image.draw(g);
+
+            g.dispose();
+            strat.show();
+
+
+        }
     }
 
     public void gameLoop() {
