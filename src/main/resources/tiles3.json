@@ -11,23 +11,14 @@
     "northTrim": [2,3,99,99],
     "southTrim": [99,99,22,23],
 
-    "northWestTrim": [4,3,20,99],
-    "northEastTrim": [2,5,99,21],
-    "southWestTrim": [0,99,24,23],
-    "southEastTrim": [99,1,22,25],
-
-    "northEastWestTrim": [4,5,20,21],
-    "northEastSouthTrim": [2,5,22,25],
-    "northWestSouthTrim": [4,3,24,23],
-    "southWestEastTrim": [0,1,24,25],
-
     "northEastCornerTrim": [99,7,99,99],
     "northWestCornerTrim": [6,99,99,99],
     "southEastCornerTrim": [99,99,99,27],
     "southWestCornerTrim": [99,99,26,99],
 
     "nothing": [99,99,99,99],
-    "roomFloor": [8,9,28,29]
+    "roomFloor": [8,9,28,29],
+    "floorShadow": [10,11,30,31]
   },
 
   "neededTiles": {

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import xyz.theasylum.zendarva.Image;
 import xyz.theasylum.zendarva.domain.DynamicTilesetData;
+import xyz.theasylum.zendarva.domain.TilesetData;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -23,6 +24,7 @@ public class TilesetGenerator {
     BufferedImage newTileset;
     DynamicTilesetData data;
     ArrayList<Rectangle> tiles;
+    TilesetData newData;
 
     public TilesetGenerator(String filename){
         String jsonName=filename.substring(0,filename.indexOf("."))+".json";
@@ -32,16 +34,13 @@ public class TilesetGenerator {
             throw new RuntimeException("Missing " + jsonName);
         JsonReader reader = new JsonReader(new InputStreamReader(is));
         data = gson.fromJson(reader, DynamicTilesetData.class);
+        newData = new TilesetData();
 
         this.internalTileWidth = data.tileData.get("internalTileWidth");
         this.internalTileHeight = data.tileData.get("internalTileHeight");
         this.tileWidth=data.tileData.get("tileWidth");
         this.tileHeight=data.tileData.get("tileHeight");
-
         tiles = new ArrayList<Rectangle>();
-
-
-
         try {
             image = ImageIO.read(Image.class.getResourceAsStream(filename));
             int index=0;
@@ -60,9 +59,7 @@ public class TilesetGenerator {
         newTileset = new BufferedImage(image.getWidth()*2,image.getHeight()*2,BufferedImage.TYPE_4BYTE_ABGR);
     }
 
-    public BufferedImage generate2(){
-
-
+    public BufferedImage generate(){
         Graphics g = newTileset.createGraphics();
         g.setColor(Color.white);
         g.fillRect(0,0,tileWidth,tileHeight);
@@ -80,10 +77,20 @@ public class TilesetGenerator {
             createTileByArray(g,x,y,tile);
 
         }
+        setTileNumByName(g,0,"roomFloor");
+        setTileNumByName(g,193, "floorShadow");
 
         return newTileset;
 
     }
+    private void setTileNumByName(Graphics g, int num, String name){
+        int x = (num % 20) * tileWidth;
+        int y = (num / 20) * tileHeight;
+
+        createTileByName(g,x,y,name);
+        newData.namedTiles.put(name,num);
+    }
+
     private boolean checkFlag(int flag, int value){
         return (flag & value) == value;
     }
@@ -99,13 +106,8 @@ public class TilesetGenerator {
         }
     }
 
+    //This whole function is evil.
     private int checkMerge(int from, int to) {
-
-//            "0,2": 4,
-//            "1,3": 5,
-//            "20,22": 24,
-//            "21,23": 25
-
         if ((from == 0 && to == 2) || (from == 2 && to == 0))
             return 4;
         if ((from == 1 && to == 3) || (from == 3 && to == 1))
@@ -118,22 +120,6 @@ public class TilesetGenerator {
         if ((from ==6 || from ==7 || from ==26 || from ==27) && to !=99)
             return to;
         return from;
-    }
-
-    public BufferedImage generate(){
-        Graphics g = newTileset.createGraphics();
-        g.setColor(Color.white);
-        g.fillRect(0,0,tileWidth,tileHeight);
-
-        for (Integer integer : data.neededTiles.keySet()) {
-            int x = (integer % 20) * tileWidth;
-            int y = (integer /20)*tileHeight;
-
-            createTileByName(g,x,y,data.neededTiles.get(integer));
-
-        }
-
-        return newTileset;
     }
 
     public void createTileByArray(Graphics g, int x, int y, int[] tiles){

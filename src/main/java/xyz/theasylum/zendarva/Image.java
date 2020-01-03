@@ -13,7 +13,7 @@ public class Image implements IDrawable {
     private BufferedImage buf;
 
     public Image(){
-            buf = new TilesetGenerator("/tiles3.png").generate2();
+            buf = new TilesetGenerator("/tiles3.png").generate();
             File outputFile = new File("/temp/generatedTiles.png");
         try {
             ImageIO.write(buf,"png",outputFile);
