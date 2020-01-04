@@ -10,6 +10,7 @@ public class Entity {
 
     public Point loc;
     public int tileNum;
+    public String name;
 
     private HashMap<Class, Component> components = new HashMap<>();
 

@@ -13,6 +13,7 @@ import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
+import xyz.theasylum.zendarva.gui.GuiInventory;
 import xyz.theasylum.zendarva.gui.GuiManager;
 import xyz.theasylum.zendarva.gui.GuiWindowMain;
 
@@ -73,7 +74,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
         EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
 
-        addEnemies();
+        //addEnemies();
         addItems();
 
     }
@@ -114,9 +115,22 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
                 return true;
             case KeyEvent.VK_S:
                 player.getComponent(CombatStats.class).ifPresent(f -> f.setHp(0));
+                break;
             case KeyEvent.VK_G:
                 Optional<Entity> item = gameWindow.getCurrentFloor().getEntities(player.loc).stream().filter(f->f.hasComponent(Carryable.class)).findFirst();
                 item.ifPresent(f->this.playerActionQueue.add(new ActionPickupItem(player,f)));
+                break;
+            case KeyEvent.VK_ESCAPE:
+                if (GuiManager.instance().getFocusedWindow() != gameWindow){
+                    GuiManager.instance().removeWindow(GuiManager.instance().getFocusedWindow());
+                }
+                break;
+            case KeyEvent.VK_I:
+                GuiInventory inventory = new GuiInventory(120,200, player);
+                inventory.move(800/2-60,600/2-60);
+                inventory.setVisible(true);
+                GuiManager.instance().addWindow(inventory);
+                break;
 
         }
         if (newLoc.x != -1 && newLoc.y != -1) {
@@ -215,18 +229,25 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
     @Override
     public void keyReleased(KeyEvent e) {
-
-        keyQueue.add(e.getKeyCode());
+        if (GuiManager.instance().getFocusedWindow() == gameWindow || e.getKeyCode()== KeyEvent.VK_ESCAPE)
+            keyQueue.add(e.getKeyCode());
+        else
+            GuiManager.instance().processKeystroke(e);
 
     }
 
     private void addItems(){
 
-        Entity keyEntity = new Entity();
-        keyEntity.addComponent(Carryable.class, new Carryable(1));
-        keyEntity.addComponent(Renderable.class, new Renderable(gameWindow.getCurrentFloor().getTileset(),gameWindow.getCurrentFloor().getTileset().getNamedTilenum("key")));
-        keyEntity.loc= gameWindow.getCurrentFloor().getSpawn();
-        EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(keyEntity));
+        for (int i = 0 ; i <11;i++) {
+
+
+            Entity keyEntity = new Entity();
+            keyEntity.addComponent(Carryable.class, new Carryable(1));
+            keyEntity.addComponent(Renderable.class, new Renderable(gameWindow.getCurrentFloor().getTileset(), gameWindow.getCurrentFloor().getTileset().getNamedTilenum("key")));
+            keyEntity.loc = gameWindow.getCurrentFloor().getSpawn();
+            keyEntity.name = "Key" + i;
+            EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(keyEntity));
+        }
     }
 
     private void addEnemies() {

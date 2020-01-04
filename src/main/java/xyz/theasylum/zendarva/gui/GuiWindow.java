@@ -4,6 +4,7 @@ import xyz.theasylum.zendarva.ITickable;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 
+import java.awt.event.KeyEvent;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -13,8 +14,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public abstract class GuiWindow implements IDrawable, ITickable {
-    private final int width;
-    private final int height;
+    protected final int width;
+    protected final int height;
     private BufferedImage texture;
     private List<Widget> widgets;
     private Widget focusedWidget = null;
@@ -22,6 +23,8 @@ public abstract class GuiWindow implements IDrawable, ITickable {
     private boolean dirty = true;
     private boolean visible = false;
     private Point loc;
+    private int z;
+
 
     public GuiWindow(int width, int height) {
         this.width = width;
@@ -55,14 +58,21 @@ public abstract class GuiWindow implements IDrawable, ITickable {
             lg.setColor(Color.black);
 
             lg.fillRect(0,0,width,height);
+            drawBackground(lg);
 
             widgets.stream().filter(Widget::getVisible).forEach(f->f.draw(lg));
 
             drawForeground(lg);
             //dirty = false;
+            lg.dispose();
         }
         g.drawImage(texture,loc.x,loc.y,null);
 
+    }
+
+    public void move(int x, int y){
+        loc.x+=x;
+        loc.y+=y;
     }
 
     public boolean isVisible() {
@@ -80,5 +90,21 @@ public abstract class GuiWindow implements IDrawable, ITickable {
         this.dirty = dirty;
     }
 
+    public int getZ() {
+        return z;
+    }
+
+    public void setZ(int z) {
+        this.z = z;
+    }
+
+    public void processKeystroke(KeyEvent e){
+
+    }
+
+    public abstract void drawBackground(Graphics g);
+
     public abstract void drawForeground(Graphics g);
+
+
 }

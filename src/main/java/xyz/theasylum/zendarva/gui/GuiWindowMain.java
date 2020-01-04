@@ -31,6 +31,11 @@ public class GuiWindowMain extends GuiWindow {
     }
 
     @Override
+    public void drawBackground(Graphics g) {
+
+    }
+
+    @Override
     public void drawForeground(Graphics g) {
 
     }
