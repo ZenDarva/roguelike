@@ -14,13 +14,8 @@
     "northEastCornerTrim": [99,7,99,99],
     "northWestCornerTrim": [6,99,99,99],
     "southEastCornerTrim": [99,99,99,27],
-    "southWestCornerTrim": [99,99,26,99],
+    "southWestCornerTrim": [99,99,26,99]
 
-    "nothing": [99,99,99,99],
-    "roomFloor": [8,9,28,29],
-    "floorShadow": [10,11,30,31],
-    "wall": [12,13,32,33],
-    "shortWall": [12,13,10,11]
   },
 
   "neededTiles": {
@@ -40,6 +35,13 @@
     "wall",
     "shortWall",
     "floorShadow"
-]
+],
+  "directTransfer": {
+    "nothing": [99,99,99,99],
+    "roomFloor": [8,9,28,29],
+    "floorShadow": [10,11,30,31],
+    "wall": [12,13,32,33],
+    "shortWall": [12,13,10,11]
+  }
 
 }

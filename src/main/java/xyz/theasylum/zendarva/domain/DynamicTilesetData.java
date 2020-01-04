@@ -8,4 +8,5 @@ public class DynamicTilesetData {
     public HashMap<String,Integer> tileData;
     public HashMap<Integer,String> neededTiles;
     public List<String> walkableTiles;
+    public HashMap<String, int[]> directTransfer;
 }

@@ -92,23 +92,22 @@ public class TilesetGenerator {
             createTileByArray(g,x,y,tile);
 
         }
-        setTileNumByName(g,257,"roomFloor");
-        setTileNumByName(g,258, "floorShadow");
-        setTileNumByName(g,259,"wall");
-        setTileNumByName(g,260,"shortWall");
-
-        setTileNumByName(g,0,"nothing");
+            int index = 297;
+        for (String s : data.directTransfer.keySet()) {
+            setTileNumByName(g,index,s);
+            index++;
+        }
+//        setTileNumByName(g,257,"roomFloor");
+//        setTileNumByName(g,258, "floorShadow");
+//        setTileNumByName(g,259,"wall");
+//        setTileNumByName(g,260,"shortWall");
+//
+//        setTileNumByName(g,0,"nothing");
 
         for (String walkableTile : data.walkableTiles) {
             newData.walkableTiles.add(newData.namedTiles.get(walkableTile));
         }
 
-        File outputFile = new File("/temp/generatedTiles.png");
-        try {
-            ImageIO.write(newTileset,"png",outputFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         System.out.println("Done generating tileset.");
         return newTileset;
 
@@ -160,9 +159,14 @@ public class TilesetGenerator {
     }
 
     public void createTileByName(Graphics g,int x, int y, String tileName){
-        if (!data.namedMetatiles.containsKey(tileName))
-            return;
-        int[] tiles = data.namedMetatiles.get(tileName);
+        int[] tiles;
+        if (!data.namedMetatiles.containsKey(tileName)){
+            tiles = data.directTransfer.get(tileName);
+            if (tiles == null)
+                return;
+        }
+        else
+            tiles = data.namedMetatiles.get(tileName);
 
         drawTile(g,tiles[0],x,y);
         drawTile(g,tiles[1],x+internalTileWidth,y);
