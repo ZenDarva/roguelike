@@ -2,6 +2,9 @@ package xyz.theasylum.zendarva.domain;
 
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.Tileset;
+import xyz.theasylum.zendarva.component.BlocksMovement;
+import xyz.theasylum.zendarva.component.CombatStats;
+import xyz.theasylum.zendarva.component.Component;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
 import xyz.theasylum.zendarva.generator.map.BabysFirstGenerator;
@@ -13,6 +16,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Floor {
     public int getWidth() {
@@ -68,6 +72,17 @@ public class Floor {
         return getEntity(point.x,point.y);
     }
 
+    public List<Entity> getEntities(Point point){
+        return entities.stream().filter(f->f.loc.distance(point) == 0).collect(Collectors.toList());
+    }
+
+
+    public Optional<Entity> getEntityWithComponent(Point point, Class<? extends Component> type){
+        Optional<Entity> e = getEntity(point.x,point.y);
+        return e.filter(f->f.hasComponent(type));
+
+    }
+
     private void handleMobDeath(EventEntity.EventEntityDie e){
         entities.remove(e.getEntity());
     }
@@ -86,7 +101,7 @@ public class Floor {
     }
 
     public boolean moveEntity(Entity entity, int x, int y){
-        if (tileset.tileWalkable(tiles[x][y]) && ! entities.stream().anyMatch(f->f.loc.distance(x,y)==0)) {
+        if (tileset.tileWalkable(tiles[x][y]) && ! entities.stream().filter(f->f.hasComponent(BlocksMovement.class)).anyMatch(f->f.loc.distance(x,y)==0)) {
             entity.loc = new Point(x, y);
             return true;
         }
@@ -97,7 +112,7 @@ public class Floor {
     public boolean canMove(Entity entity, int x, int y){
         if (x < 0 || y < 0 || x > width-1 || y > height-1)
             return false;
-        if (tileset.tileWalkable(tiles[x][y]) && ! entities.stream().anyMatch(f->f.loc.distance(x,y)==0)) {
+        if (tileset.tileWalkable(tiles[x][y]) && ! entities.stream().filter(f->f.hasComponent(BlocksMovement.class)).anyMatch(f->f.loc.distance(x,y)==0)) {
             return true;
         }
 

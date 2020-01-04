@@ -50,4 +50,18 @@ public class EventEntity extends Event {
             return amount;
         }
     }
+
+    public static class EventEntityTakeItem extends EventEntity{
+
+        private final Entity item;
+
+        public Entity getItem() {
+            return item;
+        }
+
+        public EventEntityTakeItem(Entity entity, Entity item) {
+            super(entity);
+            this.item = item;
+        }
+    }
 }

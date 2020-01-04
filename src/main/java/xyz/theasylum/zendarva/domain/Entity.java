@@ -2,10 +2,8 @@ package xyz.theasylum.zendarva.domain;
 
 import xyz.theasylum.zendarva.component.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.awt.*;
+import java.util.HashMap;
 import java.util.Optional;
 
 public class Entity {
@@ -24,6 +22,10 @@ public class Entity {
 
     public void addComponent(Class type, Component component){
         components.put(type, component);
+    }
+
+    public boolean hasComponent(Class<? extends Component> type){
+        return components.containsKey(type);
     }
 
 

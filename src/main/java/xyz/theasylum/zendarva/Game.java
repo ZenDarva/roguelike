@@ -1,15 +1,13 @@
 package xyz.theasylum.zendarva;
 
 
+import xyz.theasylum.zendarva.action.*;
 import xyz.theasylum.zendarva.action.Action;
-import xyz.theasylum.zendarva.action.ActionAttackEntity;
-import xyz.theasylum.zendarva.action.ActionMoveEntity;
-import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorSmartZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
-import xyz.theasylum.zendarva.component.CombatStats;
-import xyz.theasylum.zendarva.component.Renderable;
+import xyz.theasylum.zendarva.component.*;
+import xyz.theasylum.zendarva.component.Component;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.drawable.IDrawable;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
@@ -69,12 +67,14 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         player.loc = gameWindow.getCurrentFloor().getSpawn();
         CombatStats stats = new CombatStats(8, 8, 2);
         player.addComponent(CombatStats.class, stats);
-
+        player.addComponent(BlocksMovement.class, new BlocksMovement());
         player.addComponent(Renderable.class, new Renderable(entityTileset,90));
+        player.addComponent(Inventory.class, new Inventory(player));
 
         EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
 
         addEnemies();
+        addItems();
 
     }
 
@@ -114,10 +114,13 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
                 return true;
             case KeyEvent.VK_S:
                 player.getComponent(CombatStats.class).ifPresent(f -> f.setHp(0));
+            case KeyEvent.VK_G:
+                Optional<Entity> item = gameWindow.getCurrentFloor().getEntities(player.loc).stream().filter(f->f.hasComponent(Carryable.class)).findFirst();
+                item.ifPresent(f->this.playerActionQueue.add(new ActionPickupItem(player,f)));
 
         }
         if (newLoc.x != -1 && newLoc.y != -1) {
-            Optional<Entity> targEntity = gameWindow.getCurrentFloor().getEntity(newLoc);
+            Optional<Entity> targEntity = gameWindow.getCurrentFloor().getEntityWithComponent(newLoc,CombatStats.class);
             targEntity.ifPresentOrElse(f -> this.playerActionQueue.add(new ActionAttackEntity(player, f)),
                     () -> this.playerActionQueue.add(new ActionMoveEntity(player, newLoc)));
             return true;
@@ -217,6 +220,15 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
     }
 
+    private void addItems(){
+
+        Entity keyEntity = new Entity();
+        keyEntity.addComponent(Carryable.class, new Carryable(1));
+        keyEntity.addComponent(Renderable.class, new Renderable(gameWindow.getCurrentFloor().getTileset(),gameWindow.getCurrentFloor().getTileset().getNamedTilenum("key")));
+        keyEntity.loc= gameWindow.getCurrentFloor().getSpawn();
+        EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(keyEntity));
+    }
+
     private void addEnemies() {
         int numEnemies = Game.rnd.nextInt(5) + 3;
 
@@ -230,6 +242,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
             enemy.addComponent(CombatStats.class, stats);
 
             enemy.addComponent(Renderable.class,new Renderable(entityTileset,80));
+            enemy.addComponent(BlocksMovement.class, new BlocksMovement());
 
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
@@ -242,6 +255,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
             CombatStats stats = new CombatStats(3,3,2);
             enemy.addComponent(CombatStats.class, stats);
             enemy.addComponent(Renderable.class,new Renderable(entityTileset,0));
+            enemy.addComponent(BlocksMovement.class, new BlocksMovement());
 
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
