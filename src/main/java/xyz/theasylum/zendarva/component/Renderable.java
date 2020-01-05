@@ -1,20 +1,24 @@
 package xyz.theasylum.zendarva.component;
 
+import com.google.gson.annotations.Expose;
 import xyz.theasylum.zendarva.Tileset;
 
 
 
 public class Renderable implements Component {
-    private Tileset tileset;
+
+
+    private int tilesetIndex;
     private int tileNum;
 
-    public Renderable(Tileset tileset, int tileNum) {
-        this.tileset = tileset;
+    public Renderable(int tilesetIndex, int tileNum) {
+        this.tilesetIndex = tilesetIndex;
         this.tileNum = tileNum;
     }
 
-    public Tileset getTileset() {
-        return tileset;
+    public Renderable() {
+        tilesetIndex=0;
+        this.tileNum=0;
     }
 
     public int getTileNum() {
@@ -23,5 +27,9 @@ public class Renderable implements Component {
 
     public void setTileNum(int tileNum) {
         this.tileNum = tileNum;
+    }
+
+    public int getTilesetIndex() {
+        return tilesetIndex;
     }
 }

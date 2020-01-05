@@ -1,10 +1,19 @@
 package xyz.theasylum.zendarva.component;
 
+import com.google.gson.annotations.Expose;
+
 public class CombatStats implements Component {
+    @Expose
     int hp;
+    @Expose
     int maxHp;
+    @Expose
     int damage;
+    @Expose
     boolean active=true;
+
+    public CombatStats() {
+    }
 
     public CombatStats(int hp, int maxHp, int damage) {
         this.hp = hp;

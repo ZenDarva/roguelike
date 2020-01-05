@@ -1,5 +1,6 @@
 package xyz.theasylum.zendarva.component;
 
+import com.google.gson.annotations.Expose;
 import xyz.theasylum.zendarva.domain.Entity;
 
 
@@ -9,12 +10,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Inventory implements Component {
+    @Expose
     List<Entity> inventory;
-    Entity owner;
 
-    public Inventory(Entity owner) {
+
+
+    public Inventory() {
         this.inventory = new ArrayList<>();
-        this.owner = owner;
+
     }
 
     public void addItem(Entity item){

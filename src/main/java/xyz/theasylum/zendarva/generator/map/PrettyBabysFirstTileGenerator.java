@@ -2,6 +2,7 @@ package xyz.theasylum.zendarva.generator.map;
 
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.Tileset;
+import xyz.theasylum.zendarva.domain.GameState;
 import xyz.theasylum.zendarva.domain.Tile;
 import xyz.theasylum.zendarva.domain.TilesetData;
 
@@ -14,20 +15,21 @@ public class PrettyBabysFirstTileGenerator implements MapGenerator {
     Tile[][] tiles;
     private int width;
     private int height;
+    //This is a transient class... We can keep this reference.
     private Tileset tileset;
 
     @Override
-    public Tile[][] generate(Random rnd, int width, int height, Tileset tileset) {
+    public Tile[][] generate(Random rnd, int width, int height, int tilesetIndex) {
         this.width = width;
         this.height = height;
-        this.tileset = tileset;
+        this.tileset = tileset=GameState.instance().getTilest(tilesetIndex);
         tiles = new Tile[width][height];
         generateRooms();
         return tiles;
     }
 
     public void generateRooms() {
-        int numRooms = Game.rnd.nextInt(15)+10;
+        int numRooms = GameState.instance().rnd.nextInt(15)+10;
         //numRooms=3;
         List<Rectangle> rooms = new LinkedList<>();
 
@@ -40,11 +42,11 @@ public class PrettyBabysFirstTileGenerator implements MapGenerator {
         }
 
         for (int i = 0; i < numRooms; i++) {
-
-            int x = Game.rnd.nextInt(width);
-            int y = Game.rnd.nextInt(height);
-            int width = Game.rnd.nextInt(8)+3;
-            int height = Game.rnd.nextInt(8)+3;
+            Random rnd = GameState.instance().rnd;
+            int x = rnd.nextInt(width);
+            int y = rnd.nextInt(height);
+            int width = rnd.nextInt(8)+3;
+            int height = rnd.nextInt(8)+3;
             Rectangle rect = new Rectangle(x, y, width, height);
 
             if (rect.x+rect.width >= this.width || rect.y + rect.height >= this.height){

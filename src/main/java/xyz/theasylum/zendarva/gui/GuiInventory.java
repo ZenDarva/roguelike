@@ -28,7 +28,7 @@ public class GuiInventory extends GuiWindow {
                 break;
             case KeyEvent.VK_DOWN:
                 index++;
-                if (index >10){
+                if (index >=10){
                     index = 10;
                 }
                 break;

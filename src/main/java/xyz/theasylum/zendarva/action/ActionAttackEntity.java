@@ -4,6 +4,7 @@ import xyz.theasylum.zendarva.component.CombatStats;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
 
@@ -27,7 +28,7 @@ public class ActionAttackEntity implements Action{
         if (targStats == null || fromStats == null|| fromStats.isActive()==false || targStats.isActive() == false){
             return false;
         }
-        int dmg = Game.rnd.nextInt(fromStats.getDamage());
+        int dmg = GameState.instance().rnd.nextInt(fromStats.getDamage());
         targStats.doDamage(dmg);
         EventBus.instance().raiseEvent(new EventEntity.EventDamageEntity(targ,dmg));
         if (targStats.getHp() <= 0){

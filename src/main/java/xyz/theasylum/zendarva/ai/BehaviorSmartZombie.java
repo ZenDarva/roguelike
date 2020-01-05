@@ -9,15 +9,16 @@ import xyz.theasylum.zendarva.action.ActionMoveEntity;
 import xyz.theasylum.zendarva.action.ActionWait;
 import xyz.theasylum.zendarva.component.Component;
 import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 
 import java.awt.*;
 import java.util.Optional;
 import java.util.Random;
 
-public class BehaviorSmartZombie extends Behavior implements Component {
-    private Entity entity;
+public class BehaviorSmartZombie extends Behavior   {
+    private transient Entity entity;
 
-    private BehaviorWander wander;
+    private transient BehaviorWander wander;
 
     public BehaviorSmartZombie(Entity entity){
 
@@ -25,29 +26,34 @@ public class BehaviorSmartZombie extends Behavior implements Component {
         wander = new BehaviorWander(entity);
     }
 
+    public BehaviorSmartZombie() {
+        wander = new BehaviorWander();
+    }
+
     @Override
     public Optional<Action> execute(Floor floor, Game game) {
         int x = entity.loc.x;
         int y = entity.loc.y;
+        Point playerLoc = GameState.instance().player.loc;
         CombatStats stats = entity.getComponent(CombatStats.class).get();
         if (stats == null){
             //I have no stats, how can i fight??
             return Optional.empty();
         }
 
-        if (entity.loc.distance(game.player.loc) > 4) {
-            if (Game.rnd.nextFloat()>.5 && stats.getHp() < stats.getMaxHp()){
+        if (entity.loc.distance(playerLoc) > 4) {
+            if (GameState.instance().rnd.nextFloat()>.5 && stats.getHp() < stats.getMaxHp()){
                 return Optional.of(new ActionWait(entity));
             }
             return wander.execute(floor, game);
         }
-        else if (entity.loc.distance(game.player.loc) == 1) {
-            return Optional.of(new ActionAttackEntity(entity,game.player));
+        else if (entity.loc.distance(playerLoc) == 1) {
+            return Optional.of(new ActionAttackEntity(entity,GameState.instance().player));
         }
         else{
 
             for (int i = 0; i < 4; i ++) {
-                Point point = generateMove(x, y, game.player);
+                Point point = generateMove(x, y, GameState.instance().player);
                 if (floor.canMove(entity, point.x, point.y))
                     return Optional.of(new ActionMoveEntity(entity, point));
             }

@@ -7,16 +7,17 @@ import xyz.theasylum.zendarva.action.ActionAttackEntity;
 import xyz.theasylum.zendarva.action.ActionMoveEntity;
 import xyz.theasylum.zendarva.component.Component;
 import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 
 import java.awt.*;
 import java.util.Optional;
 import java.util.Random;
 
-public class BehaviorZombie extends Behavior implements Component {
+public class BehaviorZombie extends Behavior {
 
-    private Entity entity;
+    private transient Entity entity;
 
-    private BehaviorWander wander;
+    private transient BehaviorWander wander;
 
     public BehaviorZombie(Entity entity){
 
@@ -24,28 +25,32 @@ public class BehaviorZombie extends Behavior implements Component {
         wander = new BehaviorWander(entity);
     }
 
+    public BehaviorZombie() {
+    }
+
     @Override
     public Optional<Action> execute(Floor floor, Game game) {
         int x = entity.loc.x;
         int y = entity.loc.y;
-        if (entity.loc.distance(game.player.loc) > 4)
+        Point playerLoc = GameState.instance().player.loc;
+        if (entity.loc.distance(playerLoc) > 4)
             return wander.execute(floor,game);
-        else if (entity.loc.distance(game.player.loc) == 1) {
-            return Optional.of(new ActionAttackEntity(entity,game.player));
+        else if (entity.loc.distance(playerLoc) == 1) {
+            return Optional.of(new ActionAttackEntity(entity,GameState.instance().player));
         }
         else{
             Random rnd = new Random();
             if (rnd.nextInt(2) > 0) {
-                if (entity.loc.x < game.player.loc.x) {
+                if (entity.loc.x < playerLoc.x) {
                     x += 1;
-                } else if (entity.loc.x > game.player.loc.x) {
+                } else if (entity.loc.x > playerLoc.x) {
                     x -= 1;
                 }
             }
             else {
-                if (entity.loc.y < game.player.loc.y) {
+                if (entity.loc.y < playerLoc.y) {
                     y += 1;
-                } else if (entity.loc.y > game.player.loc.y) {
+                } else if (entity.loc.y > playerLoc.y) {
                     y -= 1;
                 }
             }

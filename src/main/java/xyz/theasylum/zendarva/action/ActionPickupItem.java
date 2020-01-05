@@ -5,6 +5,7 @@ import xyz.theasylum.zendarva.component.Carryable;
 import xyz.theasylum.zendarva.component.Inventory;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
 
@@ -23,7 +24,6 @@ public class ActionPickupItem implements Action {
     public boolean performAction(Game game, Floor floor) {
 
         if (item.hasComponent(Carryable.class) && entity.hasComponent(Inventory.class)){
-            floor.removeEntity(item);
             Inventory i = entity.getComponent(Inventory.class).get();
             i.addItem(item);
             item.loc = new Point(-1,-1);

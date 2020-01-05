@@ -7,10 +7,9 @@ import xyz.theasylum.zendarva.ai.Behavior;
 import xyz.theasylum.zendarva.ai.BehaviorSmartZombie;
 import xyz.theasylum.zendarva.ai.BehaviorZombie;
 import xyz.theasylum.zendarva.component.*;
-import xyz.theasylum.zendarva.component.Component;
 import xyz.theasylum.zendarva.domain.Entity;
-import xyz.theasylum.zendarva.drawable.IDrawable;
-import xyz.theasylum.zendarva.drawable.widget.Widget;
+import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
 import xyz.theasylum.zendarva.gui.GuiInventory;
@@ -30,10 +29,10 @@ import java.util.Queue;
 public class Game extends Canvas implements Runnable, KeyListener, MouseListener {
     private boolean isRunning = true;
 
-    public static String seed;
-    public static Random rnd;
-
-    public static Entity player;
+//    public static String seed;
+//    public static Random rnd;
+//
+//    public static Entity player;
 
     public Queue<Action> actionQueue;
     public Queue<Action> playerActionQueue;
@@ -41,8 +40,9 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
     private GuiWindowMain gameWindow;
 
-    //bad!
-    private Tileset entityTileset;
+    //private GameState gameState;
+
+
 
     public Game() {
         Window window = new Window(800, 600, "Roguelike1", this);
@@ -51,48 +51,84 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         playerActionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
         this.requestFocus();
-        entityTileset = new Tileset("/Humanoid0.png",16,16);
+        //entityTileset = new Tileset("/Humanoid0.png",16,16);
         setupGameNew();
     }
 
-    private void setupGameNew() {
-        seed = UUID.randomUUID().toString();
-        rnd = new Random(stringToSeed(seed));
+//    private void setupGame() {
+//        seed = UUID.randomUUID().toString();
+//        rnd = new Random(stringToSeed(seed));
+//        Tileset tiles = new Tileset("/tiles3.png");
+//        player = new Entity();
+//
+//        GuiWindowMain main = new GuiWindowMain(800, 600, 40, 30, 640, 480, tiles);
+//        GuiManager.instance().addWindow(main);
+//        gameWindow = main;
+//
+//        player.loc = GameState.instance().getCurFloor().getSpawn();
+//        CombatStats stats = new CombatStats(8, 8, 2);
+//        player.addComponent(CombatStats.class, stats);
+//        player.addComponent(BlocksMovement.class, new BlocksMovement());
+//        player.addComponent(Renderable.class, new Renderable(entityTileset,90));
+//        player.addComponent(Inventory.class, new Inventory(player));
+//
+//        EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
+//
+//        //addEnemies();
+//        addItems();
+//    }
+
+    private GameState setupGameNew(){
+        GameState state = GameState.instance();
+        state.seed = UUID.randomUUID().toString();
+        state.rnd = new Random(stringToSeed(state.seed));
+
         Tileset tiles = new Tileset("/tiles3.png");
-        player = new Entity();
+        int tilesetIndex = GameState.instance().addTileset(tiles);
 
-        GuiWindowMain main = new GuiWindowMain(800, 600, 40, 30, 640, 480, tiles);
-        GuiManager.instance().addWindow(main);
-        gameWindow = main;
+        Tileset tilesEntity = new Tileset("/Humanoid0.png",16,16);
+        int entityTileset = GameState.instance().addTileset(tilesEntity);
 
-        player.loc = gameWindow.getCurrentFloor().getSpawn();
+        state.addFloor(new Floor(50,30, tilesetIndex));
+
+        Entity player = new Entity();
+        player.loc = state.getCurFloor().getSpawn();
         CombatStats stats = new CombatStats(8, 8, 2);
         player.addComponent(CombatStats.class, stats);
         player.addComponent(BlocksMovement.class, new BlocksMovement());
         player.addComponent(Renderable.class, new Renderable(entityTileset,90));
-        player.addComponent(Inventory.class, new Inventory(player));
+        player.addComponent(Inventory.class, new Inventory());
+        state.player=player;
 
         EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
 
-        //addEnemies();
-        addItems();
+        GuiWindowMain main = new GuiWindowMain(800, 600, 40, 30, 640, 480);
+        GuiManager.instance().addWindow(main);
+        gameWindow = main;
 
+        addItems();
+        //addEnemies();
+        EventBus.instance().update();//Hack!
+        System.out.println("Entities: " + GameState.instance().getEntitiesForFloor(0));
+        state.saveState();
+        return state;
     }
 
     private void processActionQueue() {
         if (playerActionQueue.isEmpty())
             return;
-        playerActionQueue.poll().performAction(this, gameWindow.getCurrentFloor());
+        playerActionQueue.poll().performAction(this, GameState.instance().getCurFloor());
 
         processAI();
 
         while (!actionQueue.isEmpty()) {
-            actionQueue.poll().performAction(this, gameWindow.getCurrentFloor());
+            actionQueue.poll().performAction(this, GameState.instance().getCurFloor());
         }
 
     }
 
     private boolean processKeyQueue() {
+    Entity player = GameState.instance().player;
         if (keyQueue.isEmpty())
             return false;
         Integer keycode = keyQueue.poll();
@@ -117,7 +153,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
                 player.getComponent(CombatStats.class).ifPresent(f -> f.setHp(0));
                 break;
             case KeyEvent.VK_G:
-                Optional<Entity> item = gameWindow.getCurrentFloor().getEntities(player.loc).stream().filter(f->f.hasComponent(Carryable.class)).findFirst();
+                Optional<Entity> item = GameState.instance().getCurFloor().getEntities(player.loc).stream().filter(f->f.hasComponent(Carryable.class)).findFirst();
                 item.ifPresent(f->this.playerActionQueue.add(new ActionPickupItem(player,f)));
                 break;
             case KeyEvent.VK_ESCAPE:
@@ -134,7 +170,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
         }
         if (newLoc.x != -1 && newLoc.y != -1) {
-            Optional<Entity> targEntity = gameWindow.getCurrentFloor().getEntityWithComponent(newLoc,CombatStats.class);
+            Optional<Entity> targEntity = GameState.instance().getCurFloor().getEntityWithComponent(newLoc,CombatStats.class);
             targEntity.ifPresentOrElse(f -> this.playerActionQueue.add(new ActionAttackEntity(player, f)),
                     () -> this.playerActionQueue.add(new ActionMoveEntity(player, newLoc)));
             return true;
@@ -190,13 +226,14 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
     }
 
     private void checkGameOver() {
-        Optional<CombatStats> stats = player.getComponent(CombatStats.class);
+        Optional<CombatStats> stats = GameState.instance().player.getComponent(CombatStats.class);
         stats.ifPresent(
                 playerStats -> {
                     if (playerStats.getHp() <= 0) {
                         JOptionPane.showMessageDialog(null, "You Lost!");
                         actionQueue.clear();
                         keyQueue.clear();
+                        GameState.instance().clear();
                         setupGameNew();
                     }
                 }
@@ -207,13 +244,13 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
 
     private void processAI() {
-        for (Entity entity : gameWindow.getCurrentFloor().getEntities()) {
+        for (Entity entity : GameState.instance().getCurFloor().getEntities()) {
             entity.getComponent(Behavior.class).ifPresent(f -> processBehavior((Behavior) f));
         }
     }
 
     private void processBehavior(Behavior behavior) {
-        behavior.execute(gameWindow.getCurrentFloor(), this).ifPresent(f -> actionQueue.add(f));
+        behavior.execute(GameState.instance().getCurFloor(), this).ifPresent(f -> actionQueue.add(f));
     }
 
 
@@ -238,31 +275,34 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
     private void addItems(){
 
-        for (int i = 0 ; i <11;i++) {
+        for (int i = 0 ; i <10;i++) {
 
 
             Entity keyEntity = new Entity();
             keyEntity.addComponent(Carryable.class, new Carryable(1));
-            keyEntity.addComponent(Renderable.class, new Renderable(gameWindow.getCurrentFloor().getTileset(), gameWindow.getCurrentFloor().getTileset().getNamedTilenum("key")));
-            keyEntity.loc = gameWindow.getCurrentFloor().getSpawn();
+            //TODO: Fix this.  .get() like this is bad.
+            int tilesetIndex = GameState.instance().getTilesetByFileName("/tiles3.png").get();
+            keyEntity.addComponent(Renderable.class, new Renderable(tilesetIndex, GameState.instance().getCurFloor().getTileset().getNamedTilenum("key")));
+            keyEntity.loc = GameState.instance().getCurFloor().getSpawn();
             keyEntity.name = "Key" + i;
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(keyEntity));
         }
     }
 
     private void addEnemies() {
-        int numEnemies = Game.rnd.nextInt(5) + 3;
+        int numEnemies = GameState.instance().rnd.nextInt(5) + 3;
+
+        int tilesetIndex = GameState.instance().getTilesetByFileName("/tiles3.png").get();
 
         for (int i = 0; i < numEnemies; i++) {
             Entity enemy = new Entity();
-            enemy.loc = gameWindow.getCurrentFloor().getSpawn();
-            enemy.tileNum = 1;
+            enemy.loc = GameState.instance().getCurFloor().getSpawn();
             enemy.addComponent(Behavior.class, new BehaviorZombie(enemy));
 
             CombatStats stats = new CombatStats(1,1,1);
             enemy.addComponent(CombatStats.class, stats);
 
-            enemy.addComponent(Renderable.class,new Renderable(entityTileset,80));
+            enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,80));
             enemy.addComponent(BlocksMovement.class, new BlocksMovement());
 
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
@@ -270,12 +310,11 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
         for (int i = 0; i < numEnemies / 3; i++) {
             Entity enemy = new Entity();
-            enemy.loc = gameWindow.getCurrentFloor().getSpawn();
-            enemy.tileNum = 2;
+            enemy.loc = GameState.instance().getCurFloor().getSpawn();
             enemy.addComponent(Behavior.class, new BehaviorSmartZombie(enemy));
             CombatStats stats = new CombatStats(3,3,2);
             enemy.addComponent(CombatStats.class, stats);
-            enemy.addComponent(Renderable.class,new Renderable(entityTileset,0));
+            enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,2));
             enemy.addComponent(BlocksMovement.class, new BlocksMovement());
 
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));

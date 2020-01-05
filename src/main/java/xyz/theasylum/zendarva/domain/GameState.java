@@ -1,0 +1,153 @@
+package xyz.theasylum.zendarva.domain;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
+import com.google.gson.stream.JsonReader;
+import xyz.theasylum.zendarva.Tileset;
+import xyz.theasylum.zendarva.component.Component;
+import xyz.theasylum.zendarva.event.EventBus;
+import xyz.theasylum.zendarva.event.EventEntity;
+import xyz.theasylum.zendarva.serialization.ComponentSerializer;
+import xyz.theasylum.zendarva.serialization.TilesetSerializer;
+
+import java.io.*;
+import java.util.*;
+
+public class GameState {
+    @Expose
+    private ArrayList<Floor> floors;
+    @Expose
+    public Entity player;
+    @Expose
+    private HashMap<Integer, Set<Entity>> entities;
+    @Expose
+    public Random rnd;
+    @Expose
+    public String seed;
+    @Expose
+    private int curFloor =-1;
+
+    private ArrayList<Tileset> tileSets;
+
+
+    private static GameState myInstance;
+
+    public void clear(){
+        myInstance= new GameState();
+    }
+
+    private GameState(){
+        EventBus.instance().registerHandler(this);
+        floors = new ArrayList<>();
+        entities= new HashMap<>();
+        tileSets=new ArrayList<>();
+    }
+
+    public static GameState instance(){
+        if (myInstance == null){
+            myInstance= new GameState();
+        }
+        return myInstance;
+    }
+
+    public int  addTileset(Tileset tileset){
+        int newIndex = tileSets.size();
+        tileSets.add(newIndex, tileset);
+        return newIndex;
+    }
+
+    public Tileset getTilest(int index){
+        return tileSets.get(index);
+    }
+
+    public Optional<Integer> getTilesetByFileName(String filename){
+        Optional<Tileset> set = tileSets.stream().filter(f->f.filename==filename).findFirst();
+        if (set.isPresent()){
+            return Optional.of(tileSets.indexOf(set.get()));
+        }
+        return Optional.empty();
+    }
+
+    /*Changes will be handled by event, shouldn't be changed manually.*/
+    public Floor getCurFloor(){
+        return floors.get(curFloor);
+    }
+
+    public void addFloor(Floor floor){
+        int newIndex = floors.size();
+        floors.add(newIndex,floor);
+        entities.put(newIndex, new HashSet<Entity>());
+        if (curFloor == -1){
+            curFloor=newIndex;
+        }
+    }
+
+    public Set<Entity> getEntitiesForFloor(Floor floor){
+        return getEntitiesForFloor(floors.indexOf(floor));
+    }
+
+    public Set<Entity> getEntitiesForFloor(int floor){
+        return entities.get(floor);
+    }
+
+    private void handleSpawnEnemey(EventEntity.EventSpawnEntity e){
+        Set<Entity> set = entities.get(curFloor);
+        set.add(e.getEntity());
+    }
+
+    private void handleMobDeath(EventEntity.EventEntityDie e){
+        Set<Entity> set = entities.get(curFloor);
+        set.remove(e.getEntity());
+    }
+
+    private void handleEntityTakeItem(EventEntity.EventEntityTakeItem e){
+        entities.get(curFloor).remove(e.getItem());
+    }
+
+    public void saveState(){
+        Gson gson = getGsonSerializer();
+
+        String str= gson.toJson(this);
+        File file = new File("/temp/world.json");
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(str.getBytes());
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public GameState loadState(){
+        Gson gson = getGsonSerializer();
+        File file = new File("/temp/world.json");
+
+        try (FileInputStream fis = new FileInputStream(file)) {
+            InputStreamReader reader = new InputStreamReader(fis);
+            GameState state = gson.fromJson(new JsonReader(reader), GameState.class);
+            myInstance.clear();
+            myInstance=state;
+            return state;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    private Gson getGsonSerializer(){
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(Tileset.class,new TilesetSerializer());
+        builder.setPrettyPrinting();
+        //builder.registerTypeAdapterFactory(new ComponentAdapterFactory());
+        builder.registerTypeAdapter(Component.class, new ComponentSerializer());
+        return builder.create();
+
+
+    }
+
+
+
+
+}

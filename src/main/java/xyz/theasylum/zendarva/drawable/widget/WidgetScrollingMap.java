@@ -1,9 +1,10 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
-import xyz.theasylum.zendarva.Game;
+import xyz.theasylum.zendarva.Tileset;
 import xyz.theasylum.zendarva.component.Renderable;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
 import xyz.theasylum.zendarva.gui.GuiWindow;
@@ -19,7 +20,6 @@ public class WidgetScrollingMap extends Widget {
     private final int height;
     private final BufferedImage texture;
 
-    private Floor floor;
     private Entity focusEntity;
     private int scale;
     int tileWidth;
@@ -34,7 +34,7 @@ public class WidgetScrollingMap extends Widget {
 
         EventBus.instance().registerHandler(this);
         texture = new BufferedImage(width,height,BufferedImage.TYPE_4BYTE_ABGR);
-        focusEntity= Game.player;
+        focusEntity= GameState.instance().player;
 
     }
     public WidgetScrollingMap(GuiWindow parent, int width, int height) {
@@ -44,6 +44,7 @@ public class WidgetScrollingMap extends Widget {
 
     @Override
     public void draw(Graphics g) {
+        Floor floor = GameState.instance().getCurFloor();
 
         Graphics gl = texture.createGraphics();
         gl.setColor(Color.black);
@@ -60,8 +61,8 @@ public class WidgetScrollingMap extends Widget {
                 floor.getTileset().drawScaled(gl,(x-offset.x) *tileWidth,(y-offset.y)*tileHeight,scale);
             }
         }
-        Rectangle rect = new Rectangle(offset.x,offset.y,width/tileWidth+offset.x,height/tileHeight+offset.x);
-        List<Point> playerFOV = floor.getFOV(Game.player);
+
+        List<Point> playerFOV = floor.getFOV(GameState.instance().player);
         for (Entity entity : floor.getEntities()) {
             if (!playerFOV.contains(entity.loc))
                 continue;
@@ -69,8 +70,9 @@ public class WidgetScrollingMap extends Widget {
                 continue;
             Optional<Renderable> entityRenderable = entity.getComponent(Renderable.class);
             entityRenderable.ifPresent(f->{
-                f.getTileset().setTileNum(f.getTileNum());
-                f.getTileset().drawScaled(gl,worldToScreenCoords(entity.loc.x,entity.loc.y),scale);
+                Tileset set = GameState.instance().getTilest(f.getTilesetIndex());
+                set.setTileNum(f.getTileNum());
+                set.drawScaled(gl,worldToScreenCoords(entity.loc.x,entity.loc.y),scale);
             });
         }
 
@@ -79,20 +81,20 @@ public class WidgetScrollingMap extends Widget {
     }
 
     public void setFloor(Floor floor) {
-        this.floor=floor;
         tileWidth = floor.getTileset().tileWidth * scale;
         tileHeight = floor.getTileset().tileHeight * scale;
     }
 
     public void setScale(int scale){
         this.scale=scale;
+        Floor floor = GameState.instance().getCurFloor();
         tileWidth = floor.getTileset().tileWidth * scale;
         tileHeight = floor.getTileset().tileHeight * scale;
     }
 
     @Override
     public void update() {
-        floor.updateFOV(Game.player);
+        GameState.instance().getCurFloor().updateFOV(GameState.instance().player);
     }
 
     private void damageEntity(EventEntity.EventDamageEntity e){
@@ -117,15 +119,16 @@ public class WidgetScrollingMap extends Widget {
     }
 
     private Point getOffset(){
-        int x = Math.max(0,focusEntity.loc.x-(width/tileWidth)/2);
-        int y = Math.max(0,focusEntity.loc.y-(height/tileHeight)/2);
+        Floor floor = GameState.instance().getCurFloor();
+        Entity player = GameState.instance().player;
+        int x = Math.max(0,player.loc.x-(width/tileWidth)/2);
+        int y = Math.max(0,player.loc.y-(height/tileHeight)/2);
         x = Math.min((floor.getWidth()-width/tileWidth),x);
         y = Math.min((floor.getHeight()-height/tileHeight),y);
         return new Point(x,y);
     }
 
     public void setFocus(Entity focusEntity){
-
         this.focusEntity = focusEntity;
     }
 }

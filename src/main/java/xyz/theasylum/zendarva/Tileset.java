@@ -1,6 +1,7 @@
 package xyz.theasylum.zendarva;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import xyz.theasylum.zendarva.domain.Tile;
 import xyz.theasylum.zendarva.domain.TilesetData;
@@ -25,15 +26,17 @@ public class Tileset {
     public static int SOUTHWEST=128;
 
 
-
+    public final String filename;
     public final int tileWidth;
     public final int tileHeight;
-    BufferedImage image;
+    @Expose(serialize = false,deserialize  =false)
+    private BufferedImage image;
     int tileNum=0;
     ArrayList<Rectangle> tiles;
     TilesetData data;
 
     public Tileset(String filename, int tileWidth, int tileHeight) {
+        this.filename = filename;
         this.tileWidth = tileWidth;
         this.tileHeight = tileHeight;
         tiles = new ArrayList<Rectangle>();
@@ -65,6 +68,7 @@ public class Tileset {
     }
 
     public Tileset(String filename){
+        this.filename=filename;
         TilesetGenerator generator = new TilesetGenerator(filename);
         image = generator.generate();
         data = generator.getNewData();

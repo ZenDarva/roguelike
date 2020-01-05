@@ -6,13 +6,17 @@ import xyz.theasylum.zendarva.action.Action;
 import xyz.theasylum.zendarva.action.ActionMoveEntity;
 import xyz.theasylum.zendarva.component.Component;
 import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 
 import java.awt.*;
 import java.util.Optional;
 
-public class BehaviorWander extends Behavior implements Component {
+public class BehaviorWander extends Behavior  {
 
-    private Entity entity;
+    private transient Entity entity;
+
+    public BehaviorWander() {
+    }
 
     public BehaviorWander(Entity entity){
 
@@ -21,7 +25,7 @@ public class BehaviorWander extends Behavior implements Component {
 
     @Override
     public Optional<Action> execute(Floor floor, Game game) {
-        int rndMove = Game.rnd.nextInt(4);
+        int rndMove = GameState.instance().rnd.nextInt(4);
         int x = entity.loc.x;
         int y = entity.loc.y;
 

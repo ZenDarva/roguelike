@@ -1,21 +1,19 @@
 package xyz.theasylum.zendarva.domain;
 
-import xyz.theasylum.zendarva.Game;
+import com.google.gson.annotations.Expose;
 import xyz.theasylum.zendarva.Tileset;
 import xyz.theasylum.zendarva.component.BlocksMovement;
-import xyz.theasylum.zendarva.component.CombatStats;
 import xyz.theasylum.zendarva.component.Component;
 import xyz.theasylum.zendarva.event.EventBus;
-import xyz.theasylum.zendarva.event.EventEntity;
-import xyz.theasylum.zendarva.generator.map.BabysFirstGenerator;
 import xyz.theasylum.zendarva.generator.map.MapGenerator;
 import xyz.theasylum.zendarva.generator.map.PrettyBabysFirstTileGenerator;
 
 import java.awt.*;
-import java.util.Collections;
+import java.beans.ConstructorProperties;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Floor {
@@ -27,20 +25,26 @@ public class Floor {
         return height;
     }
 
+    @Expose
     private final int width;
+    @Expose
     private final int height;
+    @Expose
+    private int tilesetIndex;
 
+    @Expose
     private final Tile[][] tiles;
-    private final Tileset tileset;
 
-    private final List<Entity> entities = new LinkedList<>();
 
-    public Floor(int width, int height,Tileset tileset) {
+
+
+    public Floor(int width, int height,int tilesetIndex) {
         this.width = width;
         this.height = height;
-        this.tileset = tileset;
+        this.tilesetIndex = tilesetIndex;
+
         MapGenerator generator = new PrettyBabysFirstTileGenerator();
-        tiles=generator.generate(Game.rnd,width,height,tileset);
+        tiles=generator.generate(GameState.instance().rnd,width,height,tilesetIndex);
 
         EventBus.instance().registerHandler(this);
     }
@@ -48,20 +52,11 @@ public class Floor {
     public Tile[][] getTiles(){
         return tiles;
     }
-    public void addEntity(Entity entity){
-        entities.add(entity);
-    }
-    public void removeEntity(Entity entity) {
-        entities.remove(entity);
-    }
-    public List<Entity> getEntities(){
-        return Collections.unmodifiableList(entities);
-    }
-
 
     public Optional<Entity> getEntity(int x, int y){
         Point point = new Point(x,y);
-        Optional<Entity> optEnt = entities.stream().filter(f->f.loc.distance(point)==0).findFirst();
+
+        Optional<Entity> optEnt = getEntities().stream().filter(f->f.loc.distance(point)==0).findFirst();
         return optEnt;
 
     }
@@ -73,7 +68,7 @@ public class Floor {
     }
 
     public List<Entity> getEntities(Point point){
-        return entities.stream().filter(f->f.loc.distance(point) == 0).collect(Collectors.toList());
+        return getEntities().stream().filter(f->f.loc.distance(point) == 0).collect(Collectors.toList());
     }
 
 
@@ -83,25 +78,26 @@ public class Floor {
 
     }
 
-    private void handleMobDeath(EventEntity.EventEntityDie e){
-        entities.remove(e.getEntity());
+    public Set<Entity> getEntities(){
+        return GameState.instance().getEntitiesForFloor(this);
     }
 
     public Point getSpawn(){
+        Tileset tileset = GameState.instance().getTilest(tilesetIndex);
         while (true){
-            int x = Game.rnd.nextInt(width);
-            int y = Game.rnd.nextInt(height);
+            int x = GameState.instance().rnd.nextInt(width);
+            int y = GameState.instance().rnd.nextInt(height);
             if (tileset.tileWalkable(tiles[x][y]))
                 return new Point(x,y);
         }
     }
 
     public Tileset getTileset() {
-        return tileset;
+        return GameState.instance().getTilest(tilesetIndex);
     }
 
     public boolean moveEntity(Entity entity, int x, int y){
-        if (tileset.tileWalkable(tiles[x][y]) && ! entities.stream().filter(f->f.hasComponent(BlocksMovement.class)).anyMatch(f->f.loc.distance(x,y)==0)) {
+        if (getTileset().tileWalkable(tiles[x][y]) && ! getEntities().stream().filter(f->f.hasComponent(BlocksMovement.class)).anyMatch(f->f.loc.distance(x,y)==0)) {
             entity.loc = new Point(x, y);
             return true;
         }
@@ -112,7 +108,7 @@ public class Floor {
     public boolean canMove(Entity entity, int x, int y){
         if (x < 0 || y < 0 || x > width-1 || y > height-1)
             return false;
-        if (tileset.tileWalkable(tiles[x][y]) && ! entities.stream().filter(f->f.hasComponent(BlocksMovement.class)).anyMatch(f->f.loc.distance(x,y)==0)) {
+        if (getTileset().tileWalkable(tiles[x][y]) && ! getEntities().stream().filter(f->f.hasComponent(BlocksMovement.class)).anyMatch(f->f.loc.distance(x,y)==0)) {
             return true;
         }
 
@@ -165,6 +161,6 @@ public class Floor {
     public boolean isWalkable(int x, int y){
         if (x < 0 || y < 0 || x > width-1 || y > height-1)
             return false;
-        return tileset.tileWalkable(tiles[x][y]);
+        return getTileset().tileWalkable(tiles[x][y]);
     }
 }
