@@ -1,6 +1,8 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
 import xyz.theasylum.zendarva.Tileset;
+import xyz.theasylum.zendarva.ai.map.BehaviorMapGenerator;
+import xyz.theasylum.zendarva.component.Carryable;
 import xyz.theasylum.zendarva.component.Renderable;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.domain.Floor;
@@ -11,8 +13,10 @@ import xyz.theasylum.zendarva.gui.GuiWindow;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class WidgetScrollingMap extends Widget {
@@ -52,13 +56,21 @@ public class WidgetScrollingMap extends Widget {
 
         Point offset = getOffset();
 
+//        int[][] keyTargetMap = new BehaviorMapGenerator().generateFromEntities(floor, floor.getEntities().stream().filter(f->f.hasComponent(Carryable.class)).collect(Collectors.toList()));
+        gl.setColor(Color.red);
         for (int x = offset.x; x< width/tileWidth+offset.x ;x++){
             for (int y = offset.y; y < height/tileHeight+offset.y ;y++){
+
+
+
+
                 if (floor.getTiles()[x][y].visited == false){
+  //                  gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth+tileWidth/2 ,(y-offset.y)*tileHeight+tileHeight/2);
                     continue;
                 }
                 floor.getTileset().setTileNum(floor.getTiles()[x][y].tileNum);
                 floor.getTileset().drawScaled(gl,(x-offset.x) *tileWidth,(y-offset.y)*tileHeight,scale);
+//                gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth +(tileWidth/2),(y-offset.y)*tileHeight +tileHeight/2);
             }
         }
 

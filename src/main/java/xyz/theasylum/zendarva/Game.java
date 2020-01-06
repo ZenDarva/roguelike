@@ -3,9 +3,7 @@ package xyz.theasylum.zendarva;
 
 import xyz.theasylum.zendarva.action.*;
 import xyz.theasylum.zendarva.action.Action;
-import xyz.theasylum.zendarva.ai.Behavior;
-import xyz.theasylum.zendarva.ai.BehaviorSmartZombie;
-import xyz.theasylum.zendarva.ai.BehaviorZombie;
+import xyz.theasylum.zendarva.ai.*;
 import xyz.theasylum.zendarva.component.*;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.domain.Floor;
@@ -34,11 +32,12 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 //
 //    public static Entity player;
 
-    public Queue<Action> actionQueue;
+    public static Queue<Action> actionQueue;
     public Queue<Action> playerActionQueue;
     private Queue<Integer> keyQueue;
 
     private GuiWindowMain gameWindow;
+    private BehaviorSystem behaviorSystem = new BehaviorSystem();
 
     //private GameState gameState;
 
@@ -51,32 +50,9 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         playerActionQueue = new ArrayDeque<>();
         keyQueue = new ArrayDeque<>();
         this.requestFocus();
-        //entityTileset = new Tileset("/Humanoid0.png",16,16);
         setupGameNew();
     }
 
-//    private void setupGame() {
-//        seed = UUID.randomUUID().toString();
-//        rnd = new Random(stringToSeed(seed));
-//        Tileset tiles = new Tileset("/tiles3.png");
-//        player = new Entity();
-//
-//        GuiWindowMain main = new GuiWindowMain(800, 600, 40, 30, 640, 480, tiles);
-//        GuiManager.instance().addWindow(main);
-//        gameWindow = main;
-//
-//        player.loc = GameState.instance().getCurFloor().getSpawn();
-//        CombatStats stats = new CombatStats(8, 8, 2);
-//        player.addComponent(CombatStats.class, stats);
-//        player.addComponent(BlocksMovement.class, new BlocksMovement());
-//        player.addComponent(Renderable.class, new Renderable(entityTileset,90));
-//        player.addComponent(Inventory.class, new Inventory(player));
-//
-//        EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(player));
-//
-//        //addEnemies();
-//        addItems();
-//    }
 
     private GameState setupGameNew(){
         GameState state = GameState.instance();
@@ -107,9 +83,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         gameWindow = main;
 
         addItems();
-        //addEnemies();
+        addEnemies();
         EventBus.instance().update();//Hack!
-        System.out.println("Entities: " + GameState.instance().getEntitiesForFloor(0));
         state.saveState();
         return state;
     }
@@ -244,9 +219,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
 
     private void processAI() {
-        for (Entity entity : GameState.instance().getCurFloor().getEntities()) {
-            entity.getComponent(Behavior.class).ifPresent(f -> processBehavior((Behavior) f));
-        }
+        behaviorSystem.update();
     }
 
     private void processBehavior(Behavior behavior) {
@@ -292,12 +265,12 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
     private void addEnemies() {
         int numEnemies = GameState.instance().rnd.nextInt(5) + 3;
 
-        int tilesetIndex = GameState.instance().getTilesetByFileName("/tiles3.png").get();
+        int tilesetIndex = GameState.instance().getTilesetByFileName("/Humanoid0.png").get();
 
         for (int i = 0; i < numEnemies; i++) {
             Entity enemy = new Entity();
             enemy.loc = GameState.instance().getCurFloor().getSpawn();
-            enemy.addComponent(Behavior.class, new BehaviorZombie(enemy));
+            enemy.addComponent(Behavior.class, new BehaviorNewZombie());
 
             CombatStats stats = new CombatStats(1,1,1);
             enemy.addComponent(CombatStats.class, stats);
@@ -311,7 +284,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         for (int i = 0; i < numEnemies / 3; i++) {
             Entity enemy = new Entity();
             enemy.loc = GameState.instance().getCurFloor().getSpawn();
-            enemy.addComponent(Behavior.class, new BehaviorSmartZombie(enemy));
+            enemy.addComponent(Behavior.class, new BehaviorNewZombie());
             CombatStats stats = new CombatStats(3,3,2);
             enemy.addComponent(CombatStats.class, stats);
             enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,2));

@@ -10,4 +10,14 @@ import java.util.Optional;
 public abstract class Behavior implements Component {
 
     public abstract Optional<Action> execute(Floor floor, Game game);
+
+    protected int los;
+
+    public int getLos() {
+        return los;
+    }
+
+    public void setLos(int los) {
+        this.los = los;
+    }
 }
