@@ -46,7 +46,7 @@ public abstract class GuiWindow implements IDrawable, ITickable {
     }
     @Override
     public void update() {
-        widgets.remove(deadWidgets);
+        widgets.removeAll(deadWidgets);
         widgets.forEach(Widget::update);
     }
 

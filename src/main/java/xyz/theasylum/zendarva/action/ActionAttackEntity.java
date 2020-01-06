@@ -25,7 +25,7 @@ public class ActionAttackEntity implements Action{
     public boolean performAction(Game game, Floor floor) {
         CombatStats targStats = targ.getComponent(CombatStats.class).get();
         CombatStats fromStats = from.getComponent(CombatStats.class).get();
-        if (targStats == null || fromStats == null|| fromStats.isActive()==false || targStats.isActive() == false){
+        if (targStats == null || fromStats == null|| !fromStats.isActive() || !targStats.isActive()){
             return false;
         }
         int dmg = GameState.instance().rnd.nextInt(fromStats.getDamage());

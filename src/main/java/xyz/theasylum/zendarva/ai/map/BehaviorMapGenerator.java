@@ -42,9 +42,6 @@ public class BehaviorMapGenerator {
                     safeWrite(tiles,neighbor.x,neighbor.y,myNum+1);
                     open.add(neighbor);
                 }
-                if (targPoint >0 && targPoint<9000){
-
-                }
             }
         }
         map.tiles=tiles;

@@ -19,7 +19,7 @@ public class TilesetSerializer implements JsonSerializer<Tileset>, JsonDeseriali
     public Tileset deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         System.out.println("Test");
         JsonObject jObj = json.getAsJsonObject();
-        Tileset tileset = null;
+        Tileset tileset;
         try {
             tileset = new Tileset(jObj.get("filename").getAsString());
         }

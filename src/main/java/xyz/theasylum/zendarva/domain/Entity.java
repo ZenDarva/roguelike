@@ -15,6 +15,7 @@ public class Entity {
 
     public <T extends Component> Optional<T>  getComponent(Class<T> type){
         if (components.containsKey(type.getCanonicalName())){
+            //noinspection unchecked
             return (Optional<T>) Optional.of(components.get(type.getCanonicalName()));
         }
         return Optional.empty();

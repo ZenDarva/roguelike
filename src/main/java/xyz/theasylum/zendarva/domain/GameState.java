@@ -62,11 +62,8 @@ public class GameState {
     }
 
     public Optional<Integer> getTilesetByFileName(String filename){
-        Optional<Tileset> set = tileSets.stream().filter(f->f.filename==filename).findFirst();
-        if (set.isPresent()){
-            return Optional.of(tileSets.indexOf(set.get()));
-        }
-        return Optional.empty();
+        Optional<Tileset> set = tileSets.stream().filter(f-> f.filename.equals(filename)).findFirst();
+        return set.map(tileset -> tileSets.indexOf(tileset));
     }
 
     /*Changes will be handled by event, shouldn't be changed manually.*/

@@ -64,7 +64,7 @@ public class WidgetScrollingMap extends Widget {
 
 
 
-                if (floor.getTiles()[x][y].visited == false){
+                if (!floor.getTiles()[x][y].visited){
   //                  gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth+tileWidth/2 ,(y-offset.y)*tileHeight+tileHeight/2);
                     continue;
                 }
@@ -78,7 +78,7 @@ public class WidgetScrollingMap extends Widget {
         for (Entity entity : floor.getEntities()) {
             if (!playerFOV.contains(entity.loc))
                 continue;
-            if (floor.getTiles()[entity.loc.x][entity.loc.y].visited == false)
+            if (!floor.getTiles()[entity.loc.x][entity.loc.y].visited)
                 continue;
             Optional<Renderable> entityRenderable = entity.getComponent(Renderable.class);
             entityRenderable.ifPresent(f->{

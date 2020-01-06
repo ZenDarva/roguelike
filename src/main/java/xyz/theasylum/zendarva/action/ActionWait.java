@@ -4,6 +4,7 @@ import xyz.theasylum.zendarva.component.CombatStats;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.Game;
 import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
 
 import java.util.Optional;
 
@@ -19,10 +20,10 @@ public class ActionWait implements Action {
     @Override
     public boolean performAction(Game game, Floor floor) {
         Optional<CombatStats> stats = entity.getComponent(CombatStats.class);
-        if (stats == null) {
+        if (!stats.isPresent()) {
             return false;
         }
-        if (!floor.getEntities().stream().filter(f -> f != entity).anyMatch(f -> f.loc.distance(entity.loc) < 5)) {
+        if (!floor.getEntities().stream().filter(f -> f.hasComponent(CombatStats.class)).filter(f->f!= entity).anyMatch(f -> f.loc.distance(entity.loc) < 5)) {
             stats.ifPresent(f -> f.heal(1));
             return true;
         }

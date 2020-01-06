@@ -56,8 +56,7 @@ public class Floor {
     public Optional<Entity> getEntity(int x, int y){
         Point point = new Point(x,y);
 
-        Optional<Entity> optEnt = getEntities().stream().filter(f->f.loc.distance(point)==0).findFirst();
-        return optEnt;
+        return getEntities().stream().filter(f->f.loc.distance(point)==0).findFirst();
 
     }
     public int getTile(int x, int y){
@@ -108,11 +107,7 @@ public class Floor {
     public boolean canMove(Entity entity, int x, int y){
         if (x < 0 || y < 0 || x > width-1 || y > height-1)
             return false;
-        if (getTileset().tileWalkable(tiles[x][y]) && ! getEntities().stream().filter(f->f.hasComponent(BlocksMovement.class)).anyMatch(f->f.loc.distance(x,y)==0)) {
-            return true;
-        }
-
-        return false;
+        return getTileset().tileWalkable(tiles[x][y]) && !getEntities().stream().filter(f -> f.hasComponent(BlocksMovement.class)).anyMatch(f -> f.loc.distance(x, y) == 0);
     }
 
     public List<Point> getFOV(Entity entity){

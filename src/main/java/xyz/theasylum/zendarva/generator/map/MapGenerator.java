@@ -7,5 +7,5 @@ import java.util.Random;
 
 public interface MapGenerator {
 
-    public Tile[][] generate(Random rnd, int width, int height, int tilesetIndex);
+    Tile[][] generate(Random rnd, int width, int height, int tilesetIndex);
 }

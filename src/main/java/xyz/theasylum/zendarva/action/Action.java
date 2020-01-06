@@ -6,7 +6,7 @@ import xyz.theasylum.zendarva.domain.Floor;
 
 public interface Action {
 
-    public boolean performAction(Game game, Floor floor);
+    boolean performAction(Game game, Floor floor);
 
-    public Entity performedBy();
+    Entity performedBy();
 }
