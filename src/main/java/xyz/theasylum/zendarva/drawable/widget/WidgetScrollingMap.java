@@ -1,8 +1,6 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
 import xyz.theasylum.zendarva.Tileset;
-import xyz.theasylum.zendarva.ai.map.BehaviorMapGenerator;
-import xyz.theasylum.zendarva.component.Carryable;
 import xyz.theasylum.zendarva.component.Renderable;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.domain.Floor;
@@ -13,10 +11,8 @@ import xyz.theasylum.zendarva.gui.GuiWindow;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 public class WidgetScrollingMap extends Widget {
@@ -56,7 +52,7 @@ public class WidgetScrollingMap extends Widget {
 
         Point offset = getOffset();
 
-//        int[][] keyTargetMap = new BehaviorMapGenerator().generateFromEntities(floor, floor.getEntities().stream().filter(f->f.hasComponent(Carryable.class)).collect(Collectors.toList()));
+//        int[][] keyTargetMap = new BehaviorMapManager().generateFromEntities(floor, floor.getEntities().stream().filter(f->f.hasComponent(Carryable.class)).collect(Collectors.toList()));
         gl.setColor(Color.red);
         for (int x = offset.x; x< width/tileWidth+offset.x ;x++){
             for (int y = offset.y; y < height/tileHeight+offset.y ;y++){
@@ -64,10 +60,10 @@ public class WidgetScrollingMap extends Widget {
 
 
 
-                if (!floor.getTiles()[x][y].visited){
-  //                  gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth+tileWidth/2 ,(y-offset.y)*tileHeight+tileHeight/2);
-                    continue;
-                }
+//                if (!floor.getTiles()[x][y].visited){
+//  //                  gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth+tileWidth/2 ,(y-offset.y)*tileHeight+tileHeight/2);
+//                    continue;
+//                }
                 floor.getTileset().setTileNum(floor.getTiles()[x][y].tileNum);
                 floor.getTileset().drawScaled(gl,(x-offset.x) *tileWidth,(y-offset.y)*tileHeight,scale);
 //                gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth +(tileWidth/2),(y-offset.y)*tileHeight +tileHeight/2);
@@ -76,10 +72,10 @@ public class WidgetScrollingMap extends Widget {
 
         List<Point> playerFOV = floor.getFOV(GameState.instance().player);
         for (Entity entity : floor.getEntities()) {
-            if (!playerFOV.contains(entity.loc))
-                continue;
-            if (!floor.getTiles()[entity.loc.x][entity.loc.y].visited)
-                continue;
+//            if (!playerFOV.contains(entity.loc))
+//                continue;
+//            if (!floor.getTiles()[entity.loc.x][entity.loc.y].visited)
+//                continue;
             Optional<Renderable> entityRenderable = entity.getComponent(Renderable.class);
             entityRenderable.ifPresent(f->{
                 Tileset set = GameState.instance().getTilest(f.getTilesetIndex());

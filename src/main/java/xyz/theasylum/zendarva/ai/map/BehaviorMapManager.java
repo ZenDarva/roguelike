@@ -9,11 +9,11 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BehaviorMapGenerator {
+public class BehaviorMapManager {
 
-    public BehaviorMap generateFromPoints(Floor floor, List<Point> goals){
-       //Object obj = new Object();
-        //Profile.start(obj);
+    HashMap<String, BehaviorMap> maps = new HashMap<>();
+
+    public void generateFromPoints(String name, Floor floor, List<Point> goals){
         BehaviorMap map = new BehaviorMap();
         int width = floor.getWidth();
         int height = floor.getHeight();
@@ -27,7 +27,7 @@ public class BehaviorMapGenerator {
             }
         }
 
-        goals.stream().forEach(f->tiles[f.x][f.y]=0);
+        goals.stream().forEach(f->safeWrite(tiles,f.x,f.y,0));
 
         Queue<Point> open = new ArrayDeque<>();
 
@@ -45,12 +45,15 @@ public class BehaviorMapGenerator {
             }
         }
         map.tiles=tiles;
-        return map;
-
+        maps.put(name,map);
     }
 
-    public BehaviorMap generateFromEntities(Floor floor, List<Entity> entities){
-        return generateFromPoints(floor, entities.stream().map(f->f.loc).collect(Collectors.toList()));
+    public BehaviorMap getMap(String name){
+        return maps.get(name);
+    }
+
+    public void generateFromEntities(String name, Floor floor, List<Entity> entities){
+        generateFromPoints(name, floor, entities.stream().map(f->f.loc).collect(Collectors.toList()));
     }
 
     private List<Point> getNeighbors(Point point){

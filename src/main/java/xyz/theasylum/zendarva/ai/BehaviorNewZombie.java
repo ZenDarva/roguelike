@@ -7,10 +7,6 @@ import xyz.theasylum.zendarva.domain.Floor;
 import java.util.Optional;
 
 public class BehaviorNewZombie extends Behavior {
-    @Override
-    public Optional<Action> execute(Floor floor, Game game) {
-        return Optional.empty();
-    }
 
     public BehaviorNewZombie() {
         this.los=7;

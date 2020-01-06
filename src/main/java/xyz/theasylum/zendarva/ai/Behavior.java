@@ -9,9 +9,27 @@ import java.util.Optional;
 
 public abstract class Behavior implements Component {
 
-    public abstract Optional<Action> execute(Floor floor, Game game);
 
+    boolean wanders = true;
+    String targMap;
     protected int los;
+    protected int desiredDistance =0 ;
+
+    public int getDesiredDistance() {
+        return desiredDistance;
+    }
+
+    public void setDesiredDistance(int desiredDistance) {
+        this.desiredDistance = desiredDistance;
+    }
+
+    public String getTargMap() {
+        return targMap;
+    }
+
+    public void setTargMap(String targMap) {
+        this.targMap = targMap;
+    }
 
     public int getLos() {
         return los;

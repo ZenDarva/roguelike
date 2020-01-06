@@ -10,10 +10,8 @@ import xyz.theasylum.zendarva.generator.map.PrettyBabysFirstTileGenerator;
 
 import java.awt.*;
 import java.beans.ConstructorProperties;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Floor {
@@ -157,5 +155,19 @@ public class Floor {
         if (x < 0 || y < 0 || x > width-1 || y > height-1)
             return false;
         return getTileset().tileWalkable(tiles[x][y]);
+    }
+
+    public List<Point> getWalkableNeighbors(Point loc) {
+        List<Point> neighbors = new ArrayList<Point>();
+        if (isWalkable(loc.x+1,loc.y))
+            neighbors.add(new Point(loc.x + 1, loc.y));
+        if (isWalkable(loc.x-1,loc.y))
+            neighbors.add(new Point(loc.x - 1, loc.y));
+        if (isWalkable(loc.x,loc.y+1))
+            neighbors.add(new Point(loc.x, loc.y + 1));
+        if (isWalkable(loc.x,loc.y-1))
+            neighbors.add(new Point(loc.x, loc.y - 1));
+        return neighbors;
+
     }
 }

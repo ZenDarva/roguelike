@@ -222,11 +222,6 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         behaviorSystem.update();
     }
 
-    private void processBehavior(Behavior behavior) {
-        behavior.execute(GameState.instance().getCurFloor(), this).ifPresent(f -> actionQueue.add(f));
-    }
-
-
     @Override
     public void keyTyped(KeyEvent e) {
 
@@ -271,7 +266,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
             Entity enemy = new Entity();
             enemy.loc = GameState.instance().getCurFloor().getSpawn();
             enemy.addComponent(Behavior.class, new BehaviorNewZombie());
-
+            enemy.getComponent(Behavior.class).get().setTargMap("keys");
+            enemy.getComponent(Behavior.class).get().setDesiredDistance(2);
             CombatStats stats = new CombatStats(1,1,1);
             enemy.addComponent(CombatStats.class, stats);
 
@@ -285,11 +281,11 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
             Entity enemy = new Entity();
             enemy.loc = GameState.instance().getCurFloor().getSpawn();
             enemy.addComponent(Behavior.class, new BehaviorNewZombie());
+            enemy.getComponent(Behavior.class).get().setTargMap("player");
             CombatStats stats = new CombatStats(3,3,2);
             enemy.addComponent(CombatStats.class, stats);
             enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,2));
             enemy.addComponent(BlocksMovement.class, new BlocksMovement());
-
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 

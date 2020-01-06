@@ -11,6 +11,7 @@ public class Renderable implements Component {
     private int tilesetIndex;
     private int tileNum;
 
+
     public Renderable(int tilesetIndex, int tileNum) {
         this.tilesetIndex = tilesetIndex;
         this.tileNum = tileNum;
