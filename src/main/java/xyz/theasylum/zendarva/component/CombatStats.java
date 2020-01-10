@@ -3,14 +3,11 @@ package xyz.theasylum.zendarva.component;
 import com.google.gson.annotations.Expose;
 
 public class CombatStats implements Component {
-    @Expose
     int hp;
-    @Expose
     int maxHp;
-    @Expose
     int damage;
-    @Expose
     boolean active=true;
+    Team team = Team.World;
 
     public CombatStats() {
     }
@@ -29,6 +26,14 @@ public class CombatStats implements Component {
         if (hp>maxHp){
             hp=maxHp;
         }
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
     public int getHp() {
@@ -65,5 +70,9 @@ public class CombatStats implements Component {
 
 
 
+    public enum Team{
+        Player,
+        World
+    }
 
 }

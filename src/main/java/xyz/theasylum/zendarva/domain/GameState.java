@@ -137,7 +137,6 @@ public class GameState {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Tileset.class,new TilesetSerializer());
         builder.setPrettyPrinting();
-        //builder.registerTypeAdapterFactory(new ComponentAdapterFactory());
         builder.registerTypeAdapter(Component.class, new ComponentSerializer());
         return builder.create();
 

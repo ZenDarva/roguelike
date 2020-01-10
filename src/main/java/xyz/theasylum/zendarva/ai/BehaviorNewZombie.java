@@ -9,6 +9,5 @@ import java.util.Optional;
 public class BehaviorNewZombie extends Behavior {
 
     public BehaviorNewZombie() {
-        this.los=7;
     }
 }

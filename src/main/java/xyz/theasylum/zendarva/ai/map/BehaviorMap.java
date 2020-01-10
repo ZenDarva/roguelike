@@ -1,5 +1,8 @@
 package xyz.theasylum.zendarva.ai.map;
 
+import xyz.theasylum.zendarva.domain.Floor;
+import xyz.theasylum.zendarva.domain.GameState;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,6 +24,7 @@ public class BehaviorMap {
         if (loc.x < 0 || loc.x >= width || loc.y < 0 || loc.y >= height)
             return Optional.empty();
         List<Point> neighbors = getNeighbors(loc);
+        Floor floor = GameState.instance().getCurFloor();
         return neighbors.stream().sorted(pointCompare).findFirst();
 
     }

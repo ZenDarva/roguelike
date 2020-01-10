@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public class ActionWait implements Action {
 
+    public static final int SAFE_DISTANCE = 5;
     private Entity entity;
 
     public ActionWait(Entity entity) {
@@ -23,7 +24,7 @@ public class ActionWait implements Action {
         if (!stats.isPresent()) {
             return false;
         }
-        if (!floor.getEntities().stream().filter(f -> f.hasComponent(CombatStats.class)).filter(f->f!= entity).anyMatch(f -> f.loc.distance(entity.loc) < 5)) {
+        if (!floor.getEntities().stream().filter(f -> f.hasComponent(CombatStats.class)).filter(f->f!= entity).anyMatch(f -> f.loc.distance(entity.loc) < SAFE_DISTANCE)) {
             stats.ifPresent(f -> f.heal(1));
             return true;
         }

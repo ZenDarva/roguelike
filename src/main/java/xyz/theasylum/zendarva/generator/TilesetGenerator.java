@@ -97,12 +97,6 @@ public class TilesetGenerator {
             setTileNumByName(g,index,s);
             index++;
         }
-//        setTileNumByName(g,257,"roomFloor");
-//        setTileNumByName(g,258, "floorShadow");
-//        setTileNumByName(g,259,"wall");
-//        setTileNumByName(g,260,"shortWall");
-//
-//        setTileNumByName(g,0,"nothing");
 
         for (String walkableTile : data.walkableTiles) {
             newData.walkableTiles.add(newData.namedTiles.get(walkableTile));

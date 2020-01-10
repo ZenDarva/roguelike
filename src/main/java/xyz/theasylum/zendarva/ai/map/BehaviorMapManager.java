@@ -11,9 +11,21 @@ import java.util.stream.Collectors;
 
 public class BehaviorMapManager {
 
+    private static BehaviorMapManager myInstance;
+
+    private BehaviorMapManager(){}
+
+    public static BehaviorMapManager instance(){
+        if (myInstance== null){
+            myInstance= new BehaviorMapManager();
+        }
+        return myInstance;
+    }
+
+
     HashMap<String, BehaviorMap> maps = new HashMap<>();
 
-    public void generateFromPoints(String name, Floor floor, List<Point> goals){
+    public BehaviorMap generateFromPoints(String name, Floor floor, List<Point> goals){
         BehaviorMap map = new BehaviorMap();
         int width = floor.getWidth();
         int height = floor.getHeight();
@@ -46,14 +58,19 @@ public class BehaviorMapManager {
         }
         map.tiles=tiles;
         maps.put(name,map);
+        return map;
     }
 
     public BehaviorMap getMap(String name){
         return maps.get(name);
     }
 
-    public void generateFromEntities(String name, Floor floor, List<Entity> entities){
-        generateFromPoints(name, floor, entities.stream().map(f->f.loc).collect(Collectors.toList()));
+    public BehaviorMap generateFromEntities(String name, Floor floor, List<Entity> entities){
+        return generateFromPoints(name, floor, entities.stream().map(f->f.loc).collect(Collectors.toList()));
+    }
+
+    public void removeMap(String name){
+        maps.remove(name);
     }
 
     private List<Point> getNeighbors(Point point){

@@ -4,6 +4,8 @@ package xyz.theasylum.zendarva;
 import xyz.theasylum.zendarva.action.*;
 import xyz.theasylum.zendarva.action.Action;
 import xyz.theasylum.zendarva.ai.*;
+import xyz.theasylum.zendarva.ai.goal.GoalMeleeTarget;
+import xyz.theasylum.zendarva.ai.goal.GoalSleep;
 import xyz.theasylum.zendarva.component.*;
 import xyz.theasylum.zendarva.domain.Entity;
 import xyz.theasylum.zendarva.domain.Floor;
@@ -71,6 +73,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         player.loc = state.getCurFloor().getSpawn();
         CombatStats stats = new CombatStats(8, 8, 2);
         player.addComponent(CombatStats.class, stats);
+        player.getComponent(CombatStats.class).get().setTeam(CombatStats.Team.Player);
         player.addComponent(BlocksMovement.class, new BlocksMovement());
         player.addComponent(Renderable.class, new Renderable(entityTileset,90));
         player.addComponent(Inventory.class, new Inventory());
@@ -265,12 +268,11 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         for (int i = 0; i < numEnemies; i++) {
             Entity enemy = new Entity();
             enemy.loc = GameState.instance().getCurFloor().getSpawn();
-            enemy.addComponent(Behavior.class, new BehaviorNewZombie());
-            enemy.getComponent(Behavior.class).get().setTargMap("keys");
-            enemy.getComponent(Behavior.class).get().setDesiredDistance(2);
+            enemy.addComponent(Behavior.class, new Behavior());
+            enemy.getComponent(Behavior.class).get().addGoal(new GoalMeleeTarget());
+            enemy.getComponent(Behavior.class).get().addGoal(new GoalSleep());
             CombatStats stats = new CombatStats(1,1,1);
             enemy.addComponent(CombatStats.class, stats);
-
             enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,80));
             enemy.addComponent(BlocksMovement.class, new BlocksMovement());
 
@@ -280,8 +282,9 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         for (int i = 0; i < numEnemies / 3; i++) {
             Entity enemy = new Entity();
             enemy.loc = GameState.instance().getCurFloor().getSpawn();
-            enemy.addComponent(Behavior.class, new BehaviorNewZombie());
-            enemy.getComponent(Behavior.class).get().setTargMap("player");
+            enemy.addComponent(Behavior.class, new Behavior());
+            enemy.getComponent(Behavior.class).get().addGoal(new GoalMeleeTarget());
+            enemy.getComponent(Behavior.class).get().addGoal(new GoalSleep());
             CombatStats stats = new CombatStats(3,3,2);
             enemy.addComponent(CombatStats.class, stats);
             enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,2));

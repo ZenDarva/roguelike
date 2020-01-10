@@ -79,6 +79,10 @@ public class Floor {
         return GameState.instance().getEntitiesForFloor(this);
     }
 
+    public Set<Entity> getEntitiesWithinRange(Point point, int range){
+        return getEntities().stream().filter(f->f.loc.distance(point) <=range).collect(Collectors.toSet());
+    }
+
     public Point getSpawn(){
         Tileset tileset = GameState.instance().getTilest(tilesetIndex);
         while (true){
