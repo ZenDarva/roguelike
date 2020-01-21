@@ -6,6 +6,7 @@ import xyz.theasylum.zendarva.drawable.widget.Widget;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -70,5 +71,15 @@ public class GuiManager implements IDrawable, ITickable {
     public void processKeystroke(KeyEvent event){
         if (focusedWindow!=null)
             focusedWindow.processKeystroke(event);
+    }
+
+    public void processMouseClick(MouseEvent event){
+        Point point = new Point(event.getX(),event.getY());
+        for (GuiWindow window : windows) {
+            if (window.getRect().contains(point)){
+                if (window.processMouseClick(event))
+                    return;
+            }
+        }
     }
 }

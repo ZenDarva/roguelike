@@ -3,6 +3,7 @@ package xyz.theasylum.zendarva.drawable.widget;
 import xyz.theasylum.zendarva.ITickable;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
@@ -17,10 +18,11 @@ public abstract class Widget implements ITickable, IWidgetContainer {
     protected int width;
     protected int height;
     protected boolean isDirty=true;
-    private BufferedImage texture;
+    protected BufferedImage texture;
     private boolean dirty = true;
     private Graphics g;
     private boolean opaque = true;
+    private Rectangle rect;
 
 
 
@@ -32,6 +34,7 @@ public abstract class Widget implements ITickable, IWidgetContainer {
         this.zDepth = zDepth;
     }
 
+
     public Widget(IWidgetContainer parent, int width, int height){
         this.parent = parent;
         this.width = width;
@@ -39,6 +42,7 @@ public abstract class Widget implements ITickable, IWidgetContainer {
         texture = new BufferedImage(width,height,BufferedImage.TYPE_4BYTE_ABGR_PRE);
         this.loc = new Point(0,0);
         widgets = new LinkedList<>();
+        rect = new Rectangle(0,0,width,height);
     }
 
 
@@ -58,6 +62,10 @@ public abstract class Widget implements ITickable, IWidgetContainer {
         smallFont = smallFont1;
     }
 
+    @Override
+    public Rectangle getRect() {
+        return rect;
+    }
 
     public void draw(Graphics g){
 
@@ -145,6 +153,18 @@ public abstract class Widget implements ITickable, IWidgetContainer {
 
     public void setOpaque(boolean opaque) {
         this.opaque = opaque;
+    }
+
+    public void move(int x, int y){
+        loc.x+=x;
+        loc.y+=y;
+        rect.x+=x;
+        rect.y+=y;
+    }
+
+    @Override
+    public boolean processMouseClick(MouseEvent e) {
+        return false;
     }
 
 }

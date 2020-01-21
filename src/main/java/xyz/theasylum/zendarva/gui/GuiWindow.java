@@ -6,6 +6,7 @@ import xyz.theasylum.zendarva.drawable.widget.IWidgetContainer;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.*;
 
 import java.awt.*;
@@ -23,6 +24,7 @@ public abstract class GuiWindow implements IDrawable, ITickable, IWidgetContaine
     private boolean visible = false;
     private Point loc;
     private int z;
+    private Rectangle rect;
 
     private static final Font mediumFont;
 
@@ -48,6 +50,7 @@ public abstract class GuiWindow implements IDrawable, ITickable, IWidgetContaine
         loc = new Point(0,0);
         widgets = new LinkedList<>();
         deadWidgets = new LinkedList<>();
+        rect = new Rectangle(0,0,width,height);
     }
     @Override
     public void addWidget(Widget widget){
@@ -89,6 +92,19 @@ public abstract class GuiWindow implements IDrawable, ITickable, IWidgetContaine
     public void move(int x, int y){
         loc.x+=x;
         loc.y+=y;
+        rect.x+=x;
+        rect.y+=y;
+    }
+
+    @Override
+    public boolean processMouseClick(MouseEvent e) {
+        for (Widget widget : widgets) {
+            if (widget.getRect().contains(e.getX(),e.getY())){
+                if (widget.processMouseClick(e))
+                    return true;
+            }
+        }
+        return false;
     }
 
     public boolean isVisible() {
@@ -123,5 +139,10 @@ public abstract class GuiWindow implements IDrawable, ITickable, IWidgetContaine
     @Override
     public Optional<IWidgetContainer> getParent() {
         return Optional.empty();
+    }
+
+    @Override
+    public Rectangle getRect() {
+        return rect;
     }
 }

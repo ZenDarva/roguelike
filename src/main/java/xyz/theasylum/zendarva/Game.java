@@ -307,7 +307,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        GuiManager.instance().processMouseClick(e);
     }
 
     @Override

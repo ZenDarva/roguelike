@@ -18,13 +18,12 @@ import java.util.Optional;
 public class WidgetScrollingMap extends Widget {
     private final int width;
     private final int height;
-    private final BufferedImage texture;
+//    private final BufferedImage texture;
 
     private Entity focusEntity;
     private int scale;
     int tileWidth;
     int tileHeight;
-    //TODO!! Fix BufferedImage use.
     //Pixel size for width/height
     public WidgetScrollingMap(GuiWindow parent, int width, int height, int scale) {
         super(parent,width,height);
@@ -33,7 +32,6 @@ public class WidgetScrollingMap extends Widget {
         this.scale = scale;
 
         EventBus.instance().registerHandler(this);
-        texture = new BufferedImage(width,height,BufferedImage.TYPE_4BYTE_ABGR);
         focusEntity= GameState.instance().player;
 
     }
@@ -41,51 +39,37 @@ public class WidgetScrollingMap extends Widget {
         this(parent,width,height,1);
     }
 
-
     @Override
-    public void draw(Graphics g) {
+    protected void drawForeground(Graphics g) {
         Floor floor = GameState.instance().getCurFloor();
 
-        Graphics gl = texture.createGraphics();
-        gl.setColor(Color.black);
-        gl.fillRect(0,0,width,height);
+        g.setColor(Color.black);
+        g.fillRect(0,0,width,height);
 
         Point offset = getOffset();
 
-//        int[][] keyTargetMap = new BehaviorMapManager().generateFromEntities(floor, floor.getEntities().stream().filter(f->f.hasComponent(Carryable.class)).collect(Collectors.toList()));
-        gl.setColor(Color.red);
+        g.setColor(Color.red);
         for (int x = offset.x; x< width/tileWidth+offset.x ;x++){
             for (int y = offset.y; y < height/tileHeight+offset.y ;y++){
-
-
-
-
-//                if (!floor.getTiles()[x][y].visited){
-//  //                  gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth+tileWidth/2 ,(y-offset.y)*tileHeight+tileHeight/2);
-//                    continue;
-//                }
                 floor.getTileset().setTileNum(floor.getTiles()[x][y].tileNum);
-                floor.getTileset().drawScaled(gl,(x-offset.x) *tileWidth,(y-offset.y)*tileHeight,scale);
-//                gl.drawString(""+keyTargetMap[x][y], (x-offset.x)*tileWidth +(tileWidth/2),(y-offset.y)*tileHeight +tileHeight/2);
+                floor.getTileset().drawScaled(g,(x-offset.x) *tileWidth,(y-offset.y)*tileHeight,scale);
+
             }
         }
 
         List<Point> playerFOV = floor.getFOV(GameState.instance().player);
         for (Entity entity : floor.getEntities()) {
-//            if (!playerFOV.contains(entity.loc))
-//                continue;
-//            if (!floor.getTiles()[entity.loc.x][entity.loc.y].visited)
-//                continue;
+            if (!playerFOV.contains(entity.loc))
+                continue;
+            if (!floor.getTiles()[entity.loc.x][entity.loc.y].visited)
+                continue;
             Optional<Renderable> entityRenderable = entity.getComponent(Renderable.class);
             entityRenderable.ifPresent(f->{
                 Tileset set = GameState.instance().getTilest(f.getTilesetIndex());
                 set.setTileNum(f.getTileNum());
-                set.drawScaled(gl,worldToScreenCoords(entity.loc.x,entity.loc.y),scale);
+                set.drawScaled(g,worldToScreenCoords(entity.loc.x,entity.loc.y),scale);
             });
         }
-
-        gl.dispose();
-        g.drawImage(texture,loc.x,loc.y,null);
     }
 
     public void setFloor(Floor floor) {
