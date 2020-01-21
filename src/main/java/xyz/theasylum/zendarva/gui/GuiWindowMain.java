@@ -21,9 +21,9 @@ public class GuiWindowMain extends GuiWindow {
         addWidget(map);
         map.setVisible(true);
 
-        WidgetStat stat = new WidgetStat(this, GameState.instance().player);
+        WidgetStat stat = new WidgetStat(this, GameState.instance().player,200,100);
         addWidget(stat);
-        stat.setLocation(new Point(10,500));
+        stat.setLocation(new Point(660,10));
         stat.setVisible(true);
 
         EventBus.instance().registerHandler(this);

@@ -14,6 +14,7 @@ import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
 import xyz.theasylum.zendarva.gui.GuiInventory;
 import xyz.theasylum.zendarva.gui.GuiManager;
+import xyz.theasylum.zendarva.gui.GuiMessageLog;
 import xyz.theasylum.zendarva.gui.GuiWindowMain;
 
 import javax.swing.*;
@@ -70,6 +71,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         state.addFloor(new Floor(50,30, tilesetIndex));
 
         Entity player = new Entity();
+        player.name="Player";
         player.loc = state.getCurFloor().getSpawn();
         CombatStats stats = new CombatStats(8, 8, 2);
         player.addComponent(CombatStats.class, stats);
@@ -89,6 +91,12 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
         addEnemies();
         EventBus.instance().update();//Hack!
         state.saveState();
+
+        GuiMessageLog log = new GuiMessageLog(800,100);
+        log.move(0,500);
+        log.setVisible(true);
+        GuiManager.instance().addWindow(log);
+        GuiManager.instance().setFocus(main);
         return state;
     }
 
@@ -275,7 +283,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
             enemy.addComponent(CombatStats.class, stats);
             enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,80));
             enemy.addComponent(BlocksMovement.class, new BlocksMovement());
-
+            enemy.name="Goblin";
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 
@@ -289,6 +297,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
             enemy.addComponent(CombatStats.class, stats);
             enemy.addComponent(Renderable.class,new Renderable(tilesetIndex,2));
             enemy.addComponent(BlocksMovement.class, new BlocksMovement());
+            enemy.name="BugBear";
             EventBus.instance().raiseEvent(new EventEntity.EventSpawnEntity(enemy));
         }
 

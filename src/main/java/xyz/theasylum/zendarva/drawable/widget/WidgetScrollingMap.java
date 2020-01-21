@@ -24,10 +24,10 @@ public class WidgetScrollingMap extends Widget {
     private int scale;
     int tileWidth;
     int tileHeight;
-
+    //TODO!! Fix BufferedImage use.
     //Pixel size for width/height
     public WidgetScrollingMap(GuiWindow parent, int width, int height, int scale) {
-        super(parent);
+        super(parent,width,height);
         this.width = width;
         this.height = height;
         this.scale = scale;
@@ -110,8 +110,7 @@ public class WidgetScrollingMap extends Widget {
 
         Point loc = worldToScreenCoords(e.getEntity().loc.x,e.getEntity().loc.y);
 
-        loc.x+=tileWidth/2;
-        loc.y+=tileHeight/2;
+        loc.y=loc.y-16;
         popup.setLocation(loc);
 
         popup.visible=true;

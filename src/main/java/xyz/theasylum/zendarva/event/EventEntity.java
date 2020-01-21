@@ -30,6 +30,7 @@ public class EventEntity extends Event {
         public EventEntityDie(Entity entity, Entity killer) {
             super(entity);
             this.killer = killer;
+            EventBus.instance().raiseEvent(new EventAddMessage(entity.name + " has died."));
         }
 
         public Entity getKiller() {
@@ -44,6 +45,7 @@ public class EventEntity extends Event {
         public EventDamageEntity(Entity entity, int amount) {
             super(entity);
             this.amount = amount;
+            EventBus.instance().raiseEvent(new EventAddMessage(entity.name + " takes "+amount + " damage."));
         }
 
         public int getAmount() {

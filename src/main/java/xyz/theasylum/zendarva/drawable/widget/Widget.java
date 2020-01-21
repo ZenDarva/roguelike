@@ -1,17 +1,27 @@
 package xyz.theasylum.zendarva.drawable.widget;
 
 import xyz.theasylum.zendarva.ITickable;
-import xyz.theasylum.zendarva.gui.GuiWindow;
 
 import java.awt.*;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.util.*;
+import java.util.List;
 
-public abstract class Widget implements ITickable {
+public abstract class Widget implements ITickable, IWidgetContainer {
 
-    protected boolean visible;
+    protected boolean visible = true;
     protected Point loc;
-    protected GuiWindow parent;
+    protected IWidgetContainer parent;
     protected int zDepth;
+    protected List<Widget> widgets;
+    protected int width;
+    protected int height;
+    protected boolean isDirty=true;
+    private BufferedImage texture;
+    private boolean dirty = true;
+    private Graphics g;
+    private boolean opaque = true;
+
 
 
     public int getzDepth() {
@@ -22,9 +32,13 @@ public abstract class Widget implements ITickable {
         this.zDepth = zDepth;
     }
 
-    public Widget(GuiWindow parent){
+    public Widget(IWidgetContainer parent, int width, int height){
         this.parent = parent;
+        this.width = width;
+        this.height = height;
+        texture = new BufferedImage(width,height,BufferedImage.TYPE_4BYTE_ABGR_PRE);
         this.loc = new Point(0,0);
+        widgets = new LinkedList<>();
     }
 
 
@@ -45,7 +59,29 @@ public abstract class Widget implements ITickable {
     }
 
 
-    public abstract void draw(Graphics g);
+    public void draw(Graphics g){
+
+        if (dirty){
+            Graphics lg = texture.createGraphics();
+            this.g=lg;
+            lg.setColor(Color.black);
+            if (opaque)
+                lg.fillRect(0,0,width,height);
+            drawBackground(lg);
+
+            widgets.stream().filter(Widget::getVisible).forEach(f->f.draw(lg));
+
+            drawForeground(lg);
+            //dirty = false;
+            lg.dispose();
+            this.g=null;
+        }
+        g.drawImage(texture,loc.x,loc.y,null);
+    }
+
+    protected void drawForeground(Graphics g){};
+
+    protected void drawBackground(Graphics g){};
 
     public void setLocation(Point point){
         loc = point;
@@ -59,17 +95,56 @@ public abstract class Widget implements ITickable {
         return visible;
     }
 
-    protected void drawSmallString(Graphics g, int x, int y, String text){
+    protected void drawSmallString(int x, int y, String text){
+        if (g==null){
+            System.out.println("Null graphics.");
+            return;
+        }
         g.setColor(Color.red);
         g.setFont(smallFont);
-        g.drawString(text,loc.x+x,loc.y+y);
+        g.drawString(text,x,y);
     }
 
-    protected void drawRect(Graphics g, int x, int y, int width, int height, boolean filled){
+    protected void drawRect(int x, int y, int width, int height, boolean filled){
+        if (g==null){
+            System.out.println("Null graphics.");
+            return;
+        }
         if (!filled)
-            g.drawRect(x+loc.x,y+loc.y,width,height);
+            g.drawRect(x,y,width,height);
         else
-            g.fillRect(x+loc.x,y+loc.y,width,height);
+            g.fillRect(x,y,width,height);
 
     }
+
+    @Override
+    public void addWidget(Widget widget) {
+        widgets.add(widget);
+        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
+    }
+
+    @Override
+    public void removeWidget(Widget widget) {
+        widgets.remove(widget);
+        Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
+    }
+
+    @Override
+    public void markDirty() {
+        dirty=true;
+    }
+
+    @Override
+    public Optional<IWidgetContainer> getParent() {
+        return Optional.of(parent);
+    }
+
+    public boolean isOpaque() {
+        return opaque;
+    }
+
+    public void setOpaque(boolean opaque) {
+        this.opaque = opaque;
+    }
+
 }

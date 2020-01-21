@@ -47,6 +47,9 @@ public class GuiManager implements IDrawable, ITickable {
             focusedWindow= windows.get(0);
         }
     }
+    public void setFocus(GuiWindow window){
+        focusedWindow = window;
+    }
 
 
     @Override

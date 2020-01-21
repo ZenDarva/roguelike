@@ -2,18 +2,17 @@ package xyz.theasylum.zendarva.gui;
 
 import xyz.theasylum.zendarva.ITickable;
 import xyz.theasylum.zendarva.drawable.IDrawable;
+import xyz.theasylum.zendarva.drawable.widget.IWidgetContainer;
 import xyz.theasylum.zendarva.drawable.widget.Widget;
 
 import java.awt.event.KeyEvent;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
-public abstract class GuiWindow implements IDrawable, ITickable {
+public abstract class GuiWindow implements IDrawable, ITickable, IWidgetContainer {
     protected final int width;
     protected final int height;
     private BufferedImage texture;
@@ -25,6 +24,21 @@ public abstract class GuiWindow implements IDrawable, ITickable {
     private Point loc;
     private int z;
 
+    private static final Font mediumFont;
+
+    static {
+        Font mediumFont1;
+        try {
+            mediumFont1 = Font.createFont(Font.TRUETYPE_FONT, Widget.class.getResourceAsStream("/square.ttf"));
+            mediumFont1=mediumFont1.deriveFont(14F).deriveFont(Font.BOLD);
+        } catch (Exception e) {
+            mediumFont1 = Font.getFont("System");
+            mediumFont1=mediumFont1.deriveFont(14F).deriveFont(Font.BOLD);
+        }
+
+        mediumFont = mediumFont1;
+    }
+
 
     public GuiWindow(int width, int height) {
         this.width = width;
@@ -35,10 +49,12 @@ public abstract class GuiWindow implements IDrawable, ITickable {
         widgets = new LinkedList<>();
         deadWidgets = new LinkedList<>();
     }
+    @Override
     public void addWidget(Widget widget){
         widgets.add(widget);
         Collections.sort(widgets, Comparator.comparingInt(Widget::getzDepth));
     }
+    @Override
     public void removeWidget(Widget widget) {
         deadWidgets.add(widget);
         widget.setVisible(false);
@@ -83,13 +99,6 @@ public abstract class GuiWindow implements IDrawable, ITickable {
         this.visible = visible;
     }
 
-    public boolean isDirty() {
-        return dirty;
-    }
-    public void setDirty(boolean dirty) {
-        this.dirty = dirty;
-    }
-
     public int getZ() {
         return z;
     }
@@ -106,5 +115,13 @@ public abstract class GuiWindow implements IDrawable, ITickable {
 
     public abstract void drawForeground(Graphics g);
 
+    @Override
+    public void markDirty() {
+        this.dirty=true;
+    }
 
+    @Override
+    public Optional<IWidgetContainer> getParent() {
+        return Optional.empty();
+    }
 }

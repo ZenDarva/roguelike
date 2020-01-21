@@ -6,8 +6,10 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import xyz.theasylum.zendarva.Tileset;
 import xyz.theasylum.zendarva.component.Component;
+import xyz.theasylum.zendarva.event.EventAddMessage;
 import xyz.theasylum.zendarva.event.EventBus;
 import xyz.theasylum.zendarva.event.EventEntity;
+import xyz.theasylum.zendarva.gui.GuiMessageLog;
 import xyz.theasylum.zendarva.serialization.ComponentSerializer;
 import xyz.theasylum.zendarva.serialization.TilesetSerializer;
 
@@ -15,20 +17,15 @@ import java.io.*;
 import java.util.*;
 
 public class GameState {
-    @Expose
     private ArrayList<Floor> floors;
-    @Expose
     public Entity player;
-    @Expose
     private HashMap<Integer, Set<Entity>> entities;
-    @Expose
     public Random rnd;
-    @Expose
     public String seed;
-    @Expose
     private int curFloor =-1;
+    private String messageLog;
 
-    private ArrayList<Tileset> tileSets;
+    private List<Tileset> tileSets;
 
 
     private static GameState myInstance;
@@ -42,6 +39,7 @@ public class GameState {
         floors = new ArrayList<>();
         entities= new HashMap<>();
         tileSets=new ArrayList<>();
+        messageLog = "";
     }
 
     public static GameState instance(){
@@ -86,6 +84,14 @@ public class GameState {
 
     public Set<Entity> getEntitiesForFloor(int floor){
         return entities.get(floor);
+    }
+
+    public void addMessage(String message){
+        messageLog+="\r\n"+message;
+        EventBus.instance().raiseEvent(new EventAddMessage(message));
+    }
+    public String getMessageLog(){
+        return messageLog;
     }
 
     private void handleSpawnEnemey(EventEntity.EventSpawnEntity e){
@@ -142,6 +148,7 @@ public class GameState {
 
 
     }
+
 
 
 
