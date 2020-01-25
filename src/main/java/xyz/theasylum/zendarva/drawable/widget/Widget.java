@@ -163,7 +163,7 @@ public abstract class Widget implements ITickable, IWidgetContainer {
     }
 
     @Override
-    public boolean processMouseClick(MouseEvent e) {
+    public boolean processMouseClick(Point pos, MouseEvent e) {
         return false;
     }
 

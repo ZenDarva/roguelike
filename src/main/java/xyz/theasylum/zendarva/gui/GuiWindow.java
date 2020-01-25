@@ -97,9 +97,9 @@ public abstract class GuiWindow implements IDrawable, ITickable, IWidgetContaine
     }
 
     @Override
-    public boolean processMouseClick(MouseEvent e) {
+    public boolean processMouseClick(Point pos, MouseEvent e) {
         for (Widget widget : widgets) {
-            if (widget.getRect().contains(e.getX(),e.getY())){
+            if (widget.getRect().contains(pos)){
                 if (widget.processMouseClick(e))
                     return true;
             }

@@ -13,6 +13,6 @@ public interface IWidgetContainer {
     public Rectangle getRect();
     public void move(int x, int y);
 
-    boolean processMouseClick(MouseEvent e);
+    boolean processMouseClick(Point pos, MouseEvent e);
 
 }
